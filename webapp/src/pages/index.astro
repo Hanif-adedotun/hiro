@@ -1,0 +1,183 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { motion } from 'framer-motion';
+---
+
+<Layout title="Hiro - AI-Powered Test Generation">
+  <main class="flex min-h-screen flex-col">
+    <!-- Hero Section -->
+    <section class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-32">
+      <div class="absolute inset-0 bg-grid-white/[0.02] bg-[size:50px_50px]" />
+      <div class="relative z-10 mx-auto max-w-5xl text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          class="mb-8"
+        >
+          <h1 class="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-6xl font-bold text-transparent md:text-7xl">
+            Hiro
+          </h1>
+          <p class="mt-4 text-xl text-muted-foreground">
+            AI-Powered Test Generation for Your Codebase
+          </p>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          class="mt-8"
+        >
+          <a
+            href="#features"
+            class="inline-flex items-center justify-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Get Started
+          </a>
+        </motion.div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24">
+      <div class="container mx-auto px-4">
+        <h2 class="mb-12 text-center text-4xl font-bold">Features</h2>
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {[
+            {
+              title: "Language Agnostic",
+              description: "Works with any programming language or testing framework",
+              icon: "🌐"
+            },
+            {
+              title: "Intelligent Test Generation",
+              description: "Leverages AI to create comprehensive test cases",
+              icon: "🤖"
+            },
+            {
+              title: "GitHub Integration",
+              description: "Seamlessly integrates with GitHub MCP",
+              icon: "🔗"
+            },
+            {
+              title: "Automated GitHub Actions",
+              description: "Creates and configures GitHub Actions for running tests",
+              icon: "⚡"
+            },
+            {
+              title: "Continuous Testing",
+              description: "Ensures your code is always tested with each change",
+              icon: "🔄"
+            }
+          ].map((feature, index) => (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              class="rounded-lg border bg-card p-6 text-card-foreground shadow-sm"
+            >
+              <div class="mb-4 text-4xl">{feature.icon}</div>
+              <h3 class="mb-2 text-xl font-semibold">{feature.title}</h3>
+              <p class="text-muted-foreground">{feature.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="bg-muted py-24">
+      <div class="container mx-auto px-4">
+        <h2 class="mb-12 text-center text-4xl font-bold">How It Works</h2>
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              step: "1",
+              title: "Code Analysis",
+              description: "Hiro analyzes your codebase to understand its structure and functionality"
+            },
+            {
+              step: "2",
+              title: "AI Test Generation",
+              description: "The AI generates appropriate test cases tailored to your specific code"
+            },
+            {
+              step: "3",
+              title: "GitHub MCP",
+              description: "Creates multiple code paths for thorough testing"
+            },
+            {
+              step: "4",
+              title: "Automated Testing",
+              description: "GitHub Actions are automatically configured to run these tests"
+            }
+          ].map((step, index) => (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              class="relative rounded-lg border bg-card p-6 text-card-foreground"
+            >
+              <div class="absolute -left-4 -top-4 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                {step.step}
+              </div>
+              <h3 class="mb-2 text-xl font-semibold">{step.title}</h3>
+              <p class="text-muted-foreground">{step.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="py-24">
+      <div class="container mx-auto px-4">
+        <h2 class="mb-12 text-center text-4xl font-bold">Benefits</h2>
+        <div class="grid gap-8 md:grid-cols-2">
+          {[
+            {
+              title: "Save Time",
+              description: "Eliminate the tedious process of writing unit tests manually"
+            },
+            {
+              title: "Improve Coverage",
+              description: "AI ensures comprehensive test coverage"
+            },
+            {
+              title: "Reduce Bugs",
+              description: "Catch issues early with thorough automated testing"
+            },
+            {
+              title: "Streamline CI/CD",
+              description: "Automated GitHub Actions integration simplifies your pipeline"
+            }
+          ].map((benefit, index) => (
+            <motion.div
+              initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              class="rounded-lg border bg-card p-6 text-card-foreground"
+            >
+              <h3 class="mb-2 text-xl font-semibold">{benefit.title}</h3>
+              <p class="text-muted-foreground">{benefit.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t bg-muted py-8">
+      <div class="container mx-auto px-4 text-center text-muted-foreground">
+        <p>Hiro - Let AI handle your testing, so you can focus on building.</p>
+      </div>
+    </footer>
+  </main>
+</Layout>
+
+<style>
+  .bg-grid-white {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+</style> 

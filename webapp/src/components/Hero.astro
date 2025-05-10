@@ -1,91 +1,128 @@
 ---
-import Bomb from '../assets/bomb.svg'
-import Mailbox from '../assets/mailbox.svg'
-import Folder from '../assets/folder.svg'
-import Savings from '../assets/savings.svg'
-import Gift from '../assets/gift.svg'
+import Bomb from "../assets/languages/flask.svg";
+import Mailbox from "../assets/languages/go.svg";
+import Folder from "../assets/languages/java.svg";
+import Savings from "../assets/languages/nextjs.svg";
+import Gift from "../assets/languages/python.svg";
 ---
 
-
 <section class="product-hero">
-    <div class="container">
-        <div class="d-table">
-            <div class="d-table-cell center">
-                <div class="hero-copy">
-                    <h1 class="h1-title">Automate your design process for creative freedom</h1>
-                    <p> Lorem, ipsum dolor sit amet consectetur adipisicing elit. Repellat excepturi dignissimos exercitationem nesciunt, quo quibusdam assums? Architecto, placeat libero. </p>
-                    <div class="product-cta">
-                      <a href="#" class="button button-primary u-full-width">Start Trial — It's Free</a>
-                    </div>
-                </div>
-            </div>
+  <div class="container">
+    <div class="d-table">
+      <div class="d-table-cell center">
+        <div class="hero-copy">
+          <h1 class="h1-title typing-animation"></h1>
+          <p>
+            Hiro automatically creates comprehensive unit tests for your
+            codebase, saving you time and improving code quality. Works with any
+            programming language or testing framework.
+          </p>
+          <div class="product-cta">
+            <a href="#" class="button button-primary u-full-width"
+              >Try Hiro — It's Free</a
+            >
+          </div>
         </div>
-        <div class="hero-media">
-            <img src={Bomb.src} alt="Dynamite">
-            <img src={Mailbox.src} alt="Mailbox">
-            <img src={Folder.src} alt="Folder">
-            <img src={Savings.src} alt="Money">
-            <img src={Gift.src} alt="Gift">
-        </div>
+      </div>
     </div>
- </section>
+    <div class="hero-media">
+      <img src={Bomb.src} alt="Dynamite" />
+      <img src={Mailbox.src} alt="Mailbox" />
+      <img src={Folder.src} alt="Folder" />
+      <img src={Savings.src} alt="Money" />
+      <img src={Gift.src} alt="Gift" />
+    </div>
+  </div>
+</section>
 
- <style lang="scss">
+<script>
+  const text = "Generate Test Cases at One Click with AI";
+  const h1Element = document.querySelector(".typing-animation");
+  let i = 0;
 
-
-.product-hero{
-  padding: 50px 0;
-  .container{
-    position: relative;
-    .d-table{
-      height: 500px;
-     }
-  }
-  .hero-media{
-    padding: 5px;
-    border-radius: 48px;
-  }
-  .hero-copy{
-    h1, p{
-      max-width: 600px;
-      margin: 20px auto;
+  function typeWriter() {
+    if (!h1Element) return;
+    if (i < text.length) {
+      h1Element.textContent += text.charAt(i);
+      i++;
+      setTimeout(typeWriter, 50);
     }
   }
-  .hero-media{
-    img{
-      position: absolute;
-      width: 160px;
-      &:nth-child(1){
-        top: 0;
-        left: -100px;
-      }
-      &:nth-child(2){
-        top: 0;
-        right: -100px;
-      }
-      &:nth-child(3){
-        top: 250px;
-        left: 0;
-      }
-      &:nth-child(4){
-        top: 250px;
-        right: 0;
-      }
-      &:nth-child(5){
-        bottom: -20px;
-        left: 50%;
-        transform: translateX(-50%);
+
+  // Start the animation when the component is mounted
+  document.addEventListener("DOMContentLoaded", typeWriter);
+</script>
+
+<style lang="scss">
+  .product-hero {
+    padding: 100px 0;
+    .container {
+      position: relative;
+      .d-table {
+        height: 500px;
       }
     }
-    @media (max-width:700px) {
-      img{
-        &:nth-child(2), &:nth-child(3),
-        &:nth-child(4){
-          display: none;
+    .hero-media {
+      padding: 5px;
+      border-radius: 48px;
+    }
+    .hero-copy {
+      h1,
+      p {
+        max-width: 600px;
+        margin: 20px auto;
+        color: white;
+      }
+    }
+    .typing-animation {
+      min-height: 0.5em;
+      border-right: 2px solid white;
+      animation: blink 0.75s step-end infinite;
+    }
+    @keyframes blink {
+      from,
+      to {
+        border-color: transparent;
+      }
+      50% {
+        border-color: white;
+      }
+    }
+    .hero-media {
+      img {
+        position: absolute;
+        width: 160px;
+        &:nth-child(1) {
+          top: 0;
+          left: -100px;
+        }
+        &:nth-child(2) {
+          top: 0;
+          right: -100px;
+        }
+        &:nth-child(3) {
+          top: 250px;
+          left: 0;
+        }
+        &:nth-child(4) {
+          top: 250px;
+          right: 0;
+        }
+        &:nth-child(5) {
+          bottom: -20px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+      }
+      @media (max-width: 700px) {
+        img {
+          &:nth-child(2),
+          &:nth-child(3),
+          &:nth-child(4) {
+            display: none;
+          }
         }
       }
     }
   }
-}
-
- </style>
+</style>

@@ -1,0 +1,9 @@
+Stepts to achieve the solution
+
+1. Get the Github Url of the project, must be public
+2. Download the project code
+NOTE: Can limit to go, react, nextjs, and popular frameworks it can run
+3. Loop through and create high level unit test cases for the repository
+4. List out the codes for the tests
+4. Put the test cases in an approprate folder using github mcp
+5. modify the package.json file or include it as a test case to run

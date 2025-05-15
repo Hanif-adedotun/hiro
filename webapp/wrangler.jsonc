@@ -3,8 +3,5 @@
   "name": "hiro",
   // Update to today's date
   "compatibility_date": "2025-05-13",
-  "assets": {
-    "directory": "./dist"
-  },
   "pages_build_output_dir": "./dist"
 }

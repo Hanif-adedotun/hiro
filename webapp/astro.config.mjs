@@ -1,9 +1,14 @@
 import { defineConfig } from 'astro/config';
 
-import netlify from "@astrojs/netlify/functions";
+import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  adapter: netlify()
+  adapter: cloudflare({
+    mode: "directory"
+  }),
+  experimental: {
+    session: true
+  }
 });

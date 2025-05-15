@@ -1,7 +1,7 @@
 {
-  "name": "idol",
+  "name": "hiro",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -10,8 +10,10 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^12.5.2",
     "@astrojs/netlify": "^6.2.5",
-    "astro": "^5.6.1"
+    "astro": "^5.6.1",
+    "wrangler": "^4.15.0"
   },
   "devDependencies": {
     "sass": "^1.63.6"

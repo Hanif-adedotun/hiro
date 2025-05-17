@@ -24,13 +24,23 @@ async def main():
      )
 
     # Create agent with the client
-    agent = MCPAgent(llm=llm, client=client, max_steps=30)
+    agent = MCPAgent(llm=llm, client=client, use_server_manager=True, max_steps=30)
 
-    # Run the query
-    result = await agent.run(
-        "List out all the files under the repo named: semra-website",
-    )
-    print(f"\nResult: {result}")
+    try:
+        # Run the query
+        result = await agent.run(
+            """
+            1. Can you go my github and search for the repo using search_repositories semra-website, and identify the language/framework it is written in,
+            2. Identify the be most popular unit test framework for that language
+            3. search through the repo and list out the files and their paths that requires unit test cases
+            
+            First, search for tools that could help me with each of these tasks.
+            """
+        )
+        print(f"\nResult: {result}")
+    finally:
+        # Clean up all sessions
+        await client.close_all_sessions()
 
 if __name__ == "__main__":
     asyncio.run(main())

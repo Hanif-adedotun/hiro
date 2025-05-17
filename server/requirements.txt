@@ -5,3 +5,6 @@ langchain_community
 tavily-python 
 streamlit 
 langchain_community
+langchain-openai
+python-dotenv
+PyGithub

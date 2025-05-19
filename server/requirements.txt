@@ -11,3 +11,4 @@ python-dotenv
 PyGithub
 mcp-use
 fastembed
+requests

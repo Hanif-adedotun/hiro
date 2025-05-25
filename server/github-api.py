@@ -1,6 +1,11 @@
 import requests
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
+import os
+from dotenv import load_dotenv
+
+# Get GitHub token from environment variable
+GITHUB_TOKEN = os.getenv('GITHUB_PERSONAL_ACCESS_TOKEN')
 
 def get_repo_info_from_url(github_url: str) -> Dict[str, str]:
     """
@@ -12,6 +17,7 @@ def get_repo_info_from_url(github_url: str) -> Dict[str, str]:
     Returns:
         Dict[str, str]: Dictionary containing owner and repo name
     """
+    
     parsed_url = urlparse(github_url)
     path_parts = parsed_url.path.strip('/').split('/')
     
@@ -38,7 +44,8 @@ def get_repository_files(github_url: str, path: str = '') -> List[Dict]:
     
     api_url = f"https://api.github.com/repos/{repo_info['owner']}/{repo_info['repo']}/contents/{path}"
     
-    response = requests.get(api_url)
+    headers = {'Authorization': f'token {GITHUB_TOKEN}'} if GITHUB_TOKEN else {}
+    response = requests.get(api_url, headers=headers)
     response.raise_for_status()
     
     return response.json()
@@ -76,7 +83,8 @@ def get_file_content(github_url: str, file_path: str) -> str:
     
     api_url = f"https://api.github.com/repos/{repo_info['owner']}/{repo_info['repo']}/contents/{file_path}"
     
-    response = requests.get(api_url)
+    headers = {'Authorization': f'token {GITHUB_TOKEN}'} if GITHUB_TOKEN else {}
+    response = requests.get(api_url, headers=headers)
     response.raise_for_status()
     
     file_data = response.json()
@@ -91,7 +99,7 @@ def get_file_content(github_url: str, file_path: str) -> str:
 
 if __name__ == "__main__":
     # Example repository URL
-    repo_url = "https://github.com/octocat/Hello-World"
+    repo_url = "https://github.com/Hanif-adedotun/semra-website"
     
     print("Repository Structure:")
     print_repository_structure(repo_url)
@@ -103,4 +111,3 @@ if __name__ == "__main__":
         print(content)
     except Exception as e:
         print(f"Error getting file content: {e}")
- 

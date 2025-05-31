@@ -8,6 +8,9 @@ export default defineConfig({
   adapter: cloudflare({
     mode: "directory"
   }),
+  vite: {
+    plugins: [tailwindcss()],
+  },
   experimental: {
     session: true
   }

@@ -12,3 +12,4 @@ PyGithub
 mcp-use
 fastembed
 requests
+debugpy

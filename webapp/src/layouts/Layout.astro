@@ -36,14 +36,15 @@ const { title } = Astro.props;
     --accent: #cc4b06;
     --dark: #000;
     --tenary: #ecf7f8;
-    --base-font: "Manrope", sans-serif;
+    --base-font: "Geist", sans-serif;
+    --background: oklch(14.5% 0 0);
   }
   html,
   body {
     font-family: var(--base-font);
     margin: 0px;
     scroll-behavior: smooth;
-    background-image: linear-gradient(to top, #161616 0%, #030316 100%);
+    background: var(--background);
   }
 
   .block {

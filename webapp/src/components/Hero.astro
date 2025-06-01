@@ -4,6 +4,8 @@ import Mailbox from "../assets/languages/go.svg";
 import Folder from "../assets/languages/java.svg";
 import Savings from "../assets/languages/nextjs.svg";
 import Gift from "../assets/languages/python.svg";
+import Typewriter from "astro-typewriter";
+import { Button } from "./ui/button";
 ---
 
 <section class="product-hero">
@@ -11,16 +13,19 @@ import Gift from "../assets/languages/python.svg";
     <div class="d-table">
       <div class="d-table-cell center">
         <div class="hero-copy">
-          <h1 class="h1-title typing-animation"></h1>
+          <Typewriter
+            messages={["Generate Test Cases at One Click with AI"]}
+            class="h1-title"
+          />
           <p>
             Hiro automatically creates comprehensive unit tests for your
             codebase, saving you time and improving code quality. Works with any
             programming language or testing framework.
           </p>
           <div class="product-cta">
-            <a href="#" class="button button-primary u-full-width"
-              >Try Hiro — It's Free</a
-            >
+            <Button variant={"default"} className="u-full-width">
+              Try Hiro — It's Free
+            </Button>
           </div>
         </div>
       </div>
@@ -35,7 +40,7 @@ import Gift from "../assets/languages/python.svg";
   </div>
 </section>
 
-<script>
+<!-- <script>
   const text = "Generate Test Cases at One Click with AI";
   const h1Element = document.querySelector(".typing-animation");
   let i = 0;
@@ -51,7 +56,7 @@ import Gift from "../assets/languages/python.svg";
 
   // Start the animation when the component is mounted
   document.addEventListener("DOMContentLoaded", typeWriter);
-</script>
+</script> -->
 
 <style lang="scss">
   .product-hero {

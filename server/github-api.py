@@ -68,9 +68,25 @@ def print_repository_structure(github_url: str, path: str = '', indent: int = 0,
         github_url (str): The GitHub repository URL
         path (str): Current path within the repository
         indent (int): Current indentation level
+        target_folder (str): The target folder to save content for
     """
     items = get_repository_files(github_url, path)
     all_content = []
+    
+    # Initialize output file if this is the target folder
+    output_file = None
+    if path == target_folder:
+        repo_name = github_url.split('/')[-1]
+        folder_name = target_folder.replace('/', '_') if target_folder else ''
+        output_file = f"{repo_name}_{folder_name}.txt" if folder_name else f"{repo_name}.txt"
+        
+        # Get the absolute path for the output file
+        output_path = os.path.join(os.getcwd(), output_file)
+        print(f"\nSaving content to: {output_path}")
+        
+        # Create or clear the file
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write('')
     
     for item in items:
         print(' ' * indent + '├── ' + item['name'])
@@ -83,24 +99,32 @@ def print_repository_structure(github_url: str, path: str = '', indent: int = 0,
                 
             try:
                 file_content = get_file_content(github_url, f"{path}/{item['name']}" if path else item['name'])
-                all_content.append(f"\n=== File: {item['name']} ===\n")
-                all_content.append(file_content)
+                content_to_write = f"\n=== File: {item['name']} ===\n{file_content}"
+                all_content.append(content_to_write)
+                
+                # Write content immediately if this is the target folder
+                if output_file:
+                    output_path = os.path.join(os.getcwd(), output_file)
+                    with open(output_path, 'a', encoding='utf-8') as f:
+                        f.write(content_to_write)
+                    print(f"Added content from: {item['name']}")
             except Exception as e:
-                print(f"Error reading file {item['name']}: {str(e)}")
+                error_msg = f"\n=== Error reading file {item['name']}: {str(e)} ===\n"
+                print(error_msg.strip())
+                if output_file:
+                    output_path = os.path.join(os.getcwd(), output_file)
+                    with open(output_path, 'a', encoding='utf-8') as f:
+                        f.write(error_msg)
         
         if item['type'] == 'dir':
             new_path = f"{path}/{item['name']}" if path else item['name']
             print_repository_structure(github_url, new_path, indent + 4, target_folder)
     
-    # Save content to file at the root level
+    # Print completion message if this is the target folder
     if path == target_folder:
-        repo_name = github_url.split('/')[-1]
-        folder_name = target_folder.replace('/', '_') if target_folder else ''
-        output_file = f"{repo_name}_{folder_name}.txt" if folder_name else f"{repo_name}.txt"
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(all_content))
-        print(f"\nSaved content to {output_file}")
-     
+        output_path = os.path.join(os.getcwd(), output_file)
+        print(f"\nSuccessfully saved all content to: {output_path}")
+
 def get_file_content(github_url: str, file_path: str):
     """
     Get the content of a specific file from a GitHub repository.
@@ -145,7 +169,7 @@ def main():
     # Example usage
     repo_url = "https://github.com/Hanif-adedotun/semra-website"
     
-    folder = "/src/app"
+    folder = "src/app"
     
     print("Repository Structure:")
     print_repository_structure(repo_url, folder)

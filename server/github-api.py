@@ -59,7 +59,7 @@ def get_repository_files(github_url: str, path: str = ''):
     
     return response.json()
 
-def print_repository_structure(github_url: str, path: str = '', indent: int = 0, target_folder : str = None):
+def print_repository_structure(github_url: str, full_context : str, path: str = '', indent: int = 0, target_folder : str = None):
     """
     Recursively print the repository structure showing directories and files.
     Also collects file contents into a text file.
@@ -74,19 +74,19 @@ def print_repository_structure(github_url: str, path: str = '', indent: int = 0,
     all_content = []
     
     # Initialize output file if this is the target folder
-    output_file = None
-    if path == target_folder:
-        repo_name = github_url.split('/')[-1]
-        folder_name = target_folder.replace('/', '_') if target_folder else ''
-        output_file = f"{repo_name}_{folder_name}.txt" if folder_name else f"{repo_name}.txt"
+    # output_file = None
+    # if path == target_folder:
+    #     repo_name = github_url.split('/')[-1]
+    #     folder_name = target_folder.replace('/', '_') if target_folder else ''
+    #     output_file = f"{repo_name}_{folder_name}.txt" if folder_name else f"{repo_name}.txt"
         
         # Get the absolute path for the output file
-        output_path = os.path.join(os.getcwd(), output_file)
-        print(f"\nSaving content to: {output_path}")
+        # output_path = os.path.join(os.getcwd(), output_file)
+        # print(f"\nSaving content to: {output_path}")
         
         # Create or clear the file
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write('')
+        # with open(output_path, 'w', encoding='utf-8') as f:
+        #     f.write('')
     
     for item in items:
         print(' ' * indent + '├── ' + item['name'])
@@ -100,30 +100,31 @@ def print_repository_structure(github_url: str, path: str = '', indent: int = 0,
             try:
                 file_content = get_file_content(github_url, f"{path}/{item['name']}" if path else item['name'])
                 content_to_write = f"\n=== File: {item['name']} ===\n{file_content}"
-                all_content.append(content_to_write)
+                full_context.append(content_to_write)
+                print(f"\nAdding context of {item['name']}: ")
                 
-                # Write content immediately if this is the target folder
-                if output_file:
-                    output_path = os.path.join(os.getcwd(), output_file)
-                    with open(output_path, 'a', encoding='utf-8') as f:
-                        f.write(content_to_write)
-                    print(f"Added content from: {item['name']}")
+                # # Write content immediately if this is the target folder
+                # if output_file:
+                #     output_path = os.path.join(os.getcwd(), output_file)
+                #     with open(output_path, 'a', encoding='utf-8') as f:
+                #         f.write(content_to_write)
+                #     print(f"Added content from: {item['name']}")
             except Exception as e:
                 error_msg = f"\n=== Error reading file {item['name']}: {str(e)} ===\n"
-                print(error_msg.strip())
-                if output_file:
-                    output_path = os.path.join(os.getcwd(), output_file)
-                    with open(output_path, 'a', encoding='utf-8') as f:
-                        f.write(error_msg)
+                # print(error_msg.strip())
+                # if output_file:
+                #     output_path = os.path.join(os.getcwd(), output_file)
+                #     with open(output_path, 'a', encoding='utf-8') as f:
+                #         f.write(error_msg)
         
         if item['type'] == 'dir':
             new_path = f"{path}/{item['name']}" if path else item['name']
-            print_repository_structure(github_url, new_path, indent + 4, target_folder)
+            print_repository_structure(github_url,full_context, new_path, indent + 4, target_folder)
     
     # Print completion message if this is the target folder
-    if path == target_folder:
-        output_path = os.path.join(os.getcwd(), output_file)
-        print(f"\nSuccessfully saved all content to: {output_path}")
+    # if path == target_folder:
+    #     output_path = os.path.join(os.getcwd(), output_file)
+    #     print(f"\nSuccessfully saved all content to: {output_path}")
 
 def get_file_content(github_url: str, file_path: str):
     """
@@ -137,6 +138,9 @@ def get_file_content(github_url: str, file_path: str):
         str: The content of the file
     """
     repo_info = get_repo_info_from_url(github_url)
+    
+    print("File path information")
+    print(file_path)
     
     api_url = f"https://api.github.com/repos/{repo_info['owner']}/{repo_info['repo']}/contents/{file_path}"
     
@@ -168,11 +172,20 @@ def get_file_content(github_url: str, file_path: str):
 def main():
     # Example usage
     repo_url = "https://github.com/Hanif-adedotun/semra-website"
+    repo_name = repo_url.split('/')[-1]
     
     folder = "src/app"
     
     print("Repository Structure:")
-    print_repository_structure(repo_url, folder)
+    full_context = ""
+    full_context = print_repository_structure(repo_url, full_context, folder )
+    
+    print(full_context)
+    # Save the full context to a file
+    if(full_context):
+        with open(f'{repo_name}.txt', 'w', encoding='utf-8') as f:
+            f.write(full_context)
+        print(f"Repository context saved to {repo_name}.txt")
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 import requests
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from urllib.parse import urlparse
 import os
 from dotenv import load_dotenv
@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import time
 import base64
+import json
 
 # Get GitHub token from environment variable
 GITHUB_TOKEN = os.getenv('GITHUB_PERSONAL_ACCESS_TOKEN')
@@ -59,6 +60,59 @@ def get_repository_files(github_url: str, path: str = ''):
     time.sleep(API_DELAY)
     
     return response.json()
+
+def get_repo_tree(github_url: str, recursive: bool = True):
+    """
+    Get the complete tree structure of a GitHub repository.
+    
+    Args:
+        github_url (str): The GitHub repository URL
+        recursive (bool): Whether to get the complete tree recursively
+        
+    Returns:
+        Dict[str, Any]: The tree structure of the repository
+    """
+    repo_info = get_repo_info_from_url(github_url)
+    
+    # First, get the default branch
+    api_url = f"https://api.github.com/repos/{repo_info['owner']}/{repo_info['repo']}"
+    headers = {'Authorization': f'token {GITHUB_TOKEN}'} if GITHUB_TOKEN else {}
+    
+    response = requests.get(api_url, headers=headers)
+    response.raise_for_status()
+    default_branch = response.json()['default_branch']
+    
+    # Get the tree
+    api_url = f"https://api.github.com/repos/{repo_info['owner']}/{repo_info['repo']}/git/trees/{default_branch}"
+    if recursive:
+        api_url += "?recursive=1"
+    
+    response = requests.get(api_url, headers=headers)
+    response.raise_for_status()
+    
+    # Add delay after each API call
+    time.sleep(API_DELAY)
+    
+    return response.json()
+
+def print_tree_structure(tree_data: Dict[str, Any], indent: int = 0):
+    """
+    Print the tree structure in a readable format.
+    
+    Args:
+        tree_data (Dict[str, Any]): The tree data from GitHub API
+        indent (int): Current indentation level
+    """
+    if 'tree' not in tree_data:
+        return
+    
+    for item in tree_data['tree']:
+        prefix = '├── ' if indent > 0 else ''
+        print(' ' * indent + prefix + item['path'])
+        
+        # If it's a directory and we have recursive data, print its contents
+        if item['type'] == 'tree' and 'children' in item:
+            print_tree_structure({'tree': item['children']}, indent + 4)
 
 def print_repository_structure(github_url: str, full_context: list, path: str = '', indent: int = 0, target_folder: str = None):
     """
@@ -164,23 +218,19 @@ def get_file_content(github_url: str, file_path: str):
     content = base64.b64decode(file_data['content']).decode('utf-8')
     return content
 
-
-
-# Plan 1
-# Loop through all files, add all content to one big txt file to get context
-#  Get test cases, max 3 for all files passed through create a Test Generation class, using a model
-#  Create test files in file called hiro_tests at the top level
-# Get context using txt file, to the model
-# Determine if any extra configuration is needed, from model, like editing the packahe.json file to run tests
-
 def main():
     # Example usage
     repo_url = "https://github.com/Hanif-adedotun/semra-website"
     repo_name = repo_url.split('/')[-1]
     
+    # Get and print the tree structure
+    print("\nRepository Tree Structure:")
+    tree_data = get_repo_tree(repo_url)
+    print_tree_structure(tree_data)
+    
     folder = "src/app"
     
-    print("Repository Structure:")
+    print("\nRepository Structure with Content:")
     full_context = []
     full_context = print_repository_structure(repo_url, full_context, folder)
     

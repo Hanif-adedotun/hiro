@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 import re
 import time
+import base64
 
 # Get GitHub token from environment variable
 GITHUB_TOKEN = os.getenv('GITHUB_PERSONAL_ACCESS_TOKEN')
@@ -59,16 +60,20 @@ def get_repository_files(github_url: str, path: str = ''):
     
     return response.json()
 
-def print_repository_structure(github_url: str, full_context : str, path: str = '', indent: int = 0, target_folder : str = None):
+def print_repository_structure(github_url: str, full_context: list, path: str = '', indent: int = 0, target_folder: str = None):
     """
     Recursively print the repository structure showing directories and files.
     Also collects file contents into a text file.
     
     Args:
         github_url (str): The GitHub repository URL
+        full_context (list): List to store file contents
         path (str): Current path within the repository
         indent (int): Current indentation level
         target_folder (str): The target folder to save content for
+        
+    Returns:
+        list: The updated full_context list
     """
     items = get_repository_files(github_url, path)
     all_content = []
@@ -96,7 +101,7 @@ def print_repository_structure(github_url: str, full_context : str, path: str = 
             skip_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.pdf', '.avif', '.lock', '.gitignore', '.env', '.yml', '.yaml'}
             if any(item['name'].lower().endswith(ext) for ext in skip_extensions):
                 continue
-                
+                    
             try:
                 file_content = get_file_content(github_url, f"{path}/{item['name']}" if path else item['name'])
                 content_to_write = f"\n=== File: {item['name']} ===\n{file_content}"
@@ -119,12 +124,13 @@ def print_repository_structure(github_url: str, full_context : str, path: str = 
         
         if item['type'] == 'dir':
             new_path = f"{path}/{item['name']}" if path else item['name']
-            print_repository_structure(github_url,full_context, new_path, indent + 4, target_folder)
+            print_repository_structure(github_url, full_context, new_path, indent + 4, target_folder)
     
     # Print completion message if this is the target folder
     # if path == target_folder:
     #     output_path = os.path.join(os.getcwd(), output_file)
     #     print(f"\nSuccessfully saved all content to: {output_path}")
+    return full_context
 
 def get_file_content(github_url: str, file_path: str):
     """
@@ -138,9 +144,7 @@ def get_file_content(github_url: str, file_path: str):
         str: The content of the file
     """
     repo_info = get_repo_info_from_url(github_url)
-    
-    print("File path information")
-    print(file_path)
+
     
     api_url = f"https://api.github.com/repos/{repo_info['owner']}/{repo_info['repo']}/contents/{file_path}"
     
@@ -156,7 +160,7 @@ def get_file_content(github_url: str, file_path: str):
     if 'content' not in file_data:
         raise ValueError(f"Could not get content for file: {file_path}")
     
-    import base64
+    
     content = base64.b64decode(file_data['content']).decode('utf-8')
     return content
 
@@ -177,15 +181,22 @@ def main():
     folder = "src/app"
     
     print("Repository Structure:")
-    full_context = ""
-    full_context = print_repository_structure(repo_url, full_context, folder )
+    full_context = []
+    full_context = print_repository_structure(repo_url, full_context, folder)
     
-    print(full_context)
+    # Join all content with newlines
+    full_context_str = "\n".join(full_context)
+    print(full_context_str)
+    
     # Save the full context to a file
-    if(full_context):
-        with open(f'{repo_name}.txt', 'w', encoding='utf-8') as f:
-            f.write(full_context)
-        print(f"Repository context saved to {repo_name}.txt")
+    if full_context:
+        output_dir = os.path.join(os.path.dirname(__file__), repo_name)
+        os.makedirs(output_dir, exist_ok=True)
+        
+        output_file = os.path.join(output_dir, f'{repo_name}.txt')
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(full_context_str)
+        print(f"Repository context saved to {output_file}")
 
 if __name__ == "__main__":
     main()

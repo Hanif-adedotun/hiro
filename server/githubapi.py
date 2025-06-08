@@ -132,21 +132,6 @@ def print_repository_structure(github_url: str, full_context: list, path: str = 
     items = get_repository_files(github_url, path)
     all_content = []
     
-    # Initialize output file if this is the target folder
-    # output_file = None
-    # if path == target_folder:
-    #     repo_name = github_url.split('/')[-1]
-    #     folder_name = target_folder.replace('/', '_') if target_folder else ''
-    #     output_file = f"{repo_name}_{folder_name}.txt" if folder_name else f"{repo_name}.txt"
-        
-        # Get the absolute path for the output file
-        # output_path = os.path.join(os.getcwd(), output_file)
-        # print(f"\nSaving content to: {output_path}")
-        
-        # Create or clear the file
-        # with open(output_path, 'w', encoding='utf-8') as f:
-        #     f.write('')
-    
     for item in items:
         print(' ' * indent + '├── ' + item['name'])
         

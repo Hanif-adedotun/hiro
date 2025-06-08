@@ -6,8 +6,13 @@
 # src/app/articles/page.tsx
 # src/app/articles/[id]/page.tsx
 from  githubapi import  get_repo_tree, print_tree_structure, get_file_content
-  
-def main():
+from model import model, generate_code
+import os
+from dotenv import load_dotenv
+
+async def main():
+     load_dotenv()
+   
      """
           Test out model generating test cases
           
@@ -19,8 +24,9 @@ def main():
           Steps 6: Need three things from model  
                     -> path to put the test file, 
                     -> how to run the test file - language dependent 
-     """    
-     # Example usage
+     """     
+     llm = await model()
+      
      repo_url = "https://github.com/Hanif-adedotun/semra-website"
      
      # Get and print the tree structure
@@ -31,16 +37,22 @@ def main():
      
      # Get the full context from the file
      with open('server/semra-website.txt', 'r') as f:
-         file_content = f.read()
+         full_content = f.read()
          
-     # Full Project context
+     # Get file content to generate unit test
      path = "src/app/_components/(landing)/(prayers)/prayers.tsx"
      file_content = get_file_content(repo_url, f"{path}")
      
+     user_prompt = "Generate a test function for this file"
+    
+     generated_code = generate_code(llm, tree_data, full_content, file_content, user_prompt)
+     print(generated_code)
+     
 
 if __name__ == "__main__":
-     main()
-              
+    import asyncio
+    asyncio.run(main())
+            
      
      
      

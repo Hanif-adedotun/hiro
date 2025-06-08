@@ -6,7 +6,7 @@
 # src/app/articles/page.tsx
 # src/app/articles/[id]/page.tsx
 from  githubapi import  get_repo_tree, print_tree_structure, get_file_content
-from model import model, generate_code
+from model import model, generate_code, ResponseFormatter
 import os
 from dotenv import load_dotenv
 load_dotenv('.env')
@@ -30,23 +30,38 @@ async def main():
      repo_url = "https://github.com/Hanif-adedotun/semra-website"
      
      # Get and print the tree structure
-     print("\nRepository Tree Structure:")
      tree_data = get_repo_tree(repo_url)
-     print_tree_structure(tree_data)
+     print("\nAcquired repository tree structure:")
      
      
      # Get the full context from the file
      with open('server/semra-website.txt', 'r') as f:
          full_content = f.read()
+     print("\nAcquired full context of repository tree structure:")
          
      # Get file content to generate unit test
      path = "src/app/_components/(landing)/(prayers)/prayers.tsx"
+     file_ext = path.split(".")[-1]
      file_content = get_file_content(repo_url, f"{path}")
      
      user_prompt = "Generate a test function for this file"
     
      generated_code = await generate_code(llm, str(tree_data), full_content, file_content, user_prompt)
-     print(generated_code)
+     
+     generated_code = generated_code.tool_calls[0]["args"]
+     print(generate_code["metadata"])
+     # Create test file with appropriate extension
+     test_file_name = f"test_{path.split('/')[-1].split('.')[0]}.{file_ext}"
+     test_file_path = os.path.join('hiro-tests', test_file_name)
+     
+     # Create tests directory if it doesn't exist
+     os.makedirs('hiro-tests', exist_ok=True)
+     
+     # Write generated test code to file
+     with open(test_file_path, 'w') as f:
+         f.write(generated_code["code"])
+     
+     print(f"Test file created at: {test_file_path}")
      
 
 if __name__ == "__main__":

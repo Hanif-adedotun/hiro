@@ -1,7 +1,15 @@
 import os
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
+from pydantic import BaseModel, Field
+
+
+class ResponseFormatter(BaseModel):
+    """Always use this tool to structure your response to the user."""
+    metadata: str = Field(description="Additional information needed to run the unit tests")
+    code: str = Field(description="The generated code for the user's request. Only code, no additional text.")
+    packages: list[str] = Field(description="List of required packages for the code. Package names only.")
+
 
 # Load environment variables first
 load_dotenv('.env')
@@ -48,7 +56,10 @@ async def model():
         max_retries=2,
     )
     
-    return llm
+#     model_with_structured_output = llm.with_structured_output(schema=ResponseFormatter)
+    model_with_tools = llm.bind_tools([ResponseFormatter])
+    
+    return model_with_tools
 
 async def generate_code(llm, file_tree:str, full_context: str, code_context: str, user_prompt: str) -> str:
     """
@@ -62,7 +73,7 @@ async def generate_code(llm, file_tree:str, full_context: str, code_context: str
         user_prompt: The specific code generation request
         
     Returns:
-        str: Generated code
+        ResponseFormatter: Structured response containing code and metadata
     """
     # Limit context size to prevent token limit errors
     max_context_length = 4000  # Adjust this value based on your needs
@@ -78,7 +89,7 @@ async def generate_code(llm, file_tree:str, full_context: str, code_context: str
     ]
     
     response = await llm.ainvoke(messages)
-    return response.content
+    return response
 
 async def main():
     # Example usage

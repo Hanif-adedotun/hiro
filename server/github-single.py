@@ -9,9 +9,9 @@ from  githubapi import  get_repo_tree, print_tree_structure, get_file_content
 from model import model, generate_code
 import os
 from dotenv import load_dotenv
+load_dotenv('.env')
 
 async def main():
-     load_dotenv()
    
      """
           Test out model generating test cases
@@ -45,7 +45,7 @@ async def main():
      
      user_prompt = "Generate a test function for this file"
     
-     generated_code = generate_code(llm, tree_data, full_content, file_content, user_prompt)
+     generated_code = await generate_code(llm, str(tree_data), full_content, file_content, user_prompt)
      print(generated_code)
      
 

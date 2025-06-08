@@ -3,6 +3,17 @@ from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 
+# Load environment variables first
+load_dotenv('.env')
+
+# Get API key with error handling
+GROQ_API_KEY = os.environ['GROQ_API_KEY']
+# TODO: remove this, only for test
+
+
+if not GROQ_API_KEY:
+    raise ValueError("GROQ_API_KEY not found in environment variables. Please check your .env file.")
+
 SYSTEM_PROMPT = """
 You are an expert unit test generation assistant. Your task is to:
 1. Analyze the provided code context and identify key functionality to test
@@ -26,8 +37,6 @@ Requirements:
 
 Provided below is the file tree of the repository. Use it to identify which files need testing and generate appropriate test cases.
 """
-load_dotenv()
-GROQ_API_KEY = os.environ['GROQ_KEY']
 
 async def model():
     # Load environment variables
@@ -47,15 +56,25 @@ async def generate_code(llm, file_tree:str, full_context: str, code_context: str
     
     Args:
         llm: The language model instance
-        code_context: The code context to analyze
+        file_tree: Repository file structure
+        full_context: Full repository context
+        code_context: The specific code to analyze
         user_prompt: The specific code generation request
         
     Returns:
         str: Generated code
     """
+    # Limit context size to prevent token limit errors
+    max_context_length = 4000  # Adjust this value based on your needs
+    if len(full_context) > max_context_length:
+        full_context = full_context[:max_context_length] + "...\n[Context truncated due to size limits]"
+    
+    if len(file_tree) > 1000:  # Limit file tree size
+        file_tree = file_tree[:1000] + "...\n[File tree truncated due to size limits]"
+    
     messages = [
-        {"role": "system", "content": SYSTEM_PROMPT + file_tree + full_context},
-        {"role": "user", "content": f"Code Context:\n{code_context}\n\nRequest: {user_prompt}"}
+        {"role": "system", "content": SYSTEM_PROMPT + "\nFile Tree:\n" + file_tree + "\nRepository Context:\n" + full_context},
+        {"role": "user", "content": f"Code to Test:\n{code_context}\n\nRequest: {user_prompt}"}
     ]
     
     response = await llm.ainvoke(messages)

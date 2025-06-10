@@ -48,18 +48,22 @@ async def main():
     
      generated_code = await generate_code(llm, str(tree_data), full_content, file_content, user_prompt)
      
-     generated_code = generated_code.tool_calls[0]["args"]
-     print(generate_code["metadata"])
+     response = generated_code.tool_calls[0]["args"]
+     
+    #  print("Generated Code:", response['code'])
+     print("\nMetadata:", response['metadata'])
+     print("\nRequired Packages:", response['packages'])
+     
      # Create test file with appropriate extension
      test_file_name = f"test_{path.split('/')[-1].split('.')[0]}.{file_ext}"
-     test_file_path = os.path.join('hiro-tests', test_file_name)
+     test_file_path = os.path.join('server/hiro-tests', test_file_name)
      
      # Create tests directory if it doesn't exist
-     os.makedirs('hiro-tests', exist_ok=True)
+     os.makedirs('server/hiro-tests', exist_ok=True)
      
      # Write generated test code to file
      with open(test_file_path, 'w') as f:
-         f.write(generated_code["code"])
+         f.write(response['code'])
      
      print(f"Test file created at: {test_file_path}")
      

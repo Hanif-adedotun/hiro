@@ -203,6 +203,76 @@ def get_file_content(github_url: str, file_path: str):
     content = base64.b64decode(file_data['content']).decode('utf-8')
     return content
 
+def create_branch(github_url: str, branch_name: str):
+    """
+    Create a new branch in a GitHub repository using the GitHub API.
+    
+    Args:
+        github_url (str): The GitHub repository URL
+        branch_name (str): Name for the new branch
+        
+    Returns:
+        str: A success or failure message indicating if the branch was created successfully
+    """
+    repo_info = get_repo_info_from_url(github_url)
+    
+    # Get the default branch's latest commit SHA
+    refs_url = f"https://api.github.com/repos/{repo_info['owner']}/{repo_info['repo']}/git/refs/heads"
+    headers = {'Authorization': f'token {GITHUB_TOKEN}'} if GITHUB_TOKEN else {}
+    
+    response = requests.get(refs_url, headers=headers)
+    response.raise_for_status()
+    
+    # Add delay after API call
+    time.sleep(API_DELAY)
+    
+    # Check if branch already exists
+    existing_branches = response.json()
+    if any(ref['ref'] == f'refs/heads/{branch_name}' for ref in existing_branches):
+        return f"Branch '{branch_name}' already exists"
+    
+    # Get the SHA of the default branch (usually main or master)
+    default_branch_sha = existing_branches[0]['object']['sha']
+    
+    # Create new branch
+    create_branch_url = f"https://api.github.com/repos/{repo_info['owner']}/{repo_info['repo']}/git/refs"
+    branch_data = {
+        "ref": f"refs/heads/{branch_name}",
+        "sha": default_branch_sha
+    }
+    
+    response = requests.post(create_branch_url, headers=headers, json=branch_data)
+    
+    if response.status_code == 201:
+        return f"Successfully created branch '{branch_name}'"
+    else:
+        return f"Failed to create branch: {response.json().get('message', 'Unknown error')}"
+         
+def commit_test_changes(github_url: str, file_path: str):
+         """
+    Create a pull request from file changes
+    
+    Args:
+        github_url (str): The GitHub repository URL
+        file_path (str): Path to the file within the repository
+        
+    Returns:
+        str: A success or failure message if the pull request was successfull
+    """
+    
+def create_pull_request(github_url: str, file_path: str):
+    """
+    Create a pull request from file changes
+    
+    Args:
+        github_url (str): The GitHub repository URL
+        file_path (str): Path to the file within the repository
+        
+    Returns:
+        str: A success or failure message if the pull request was successfull
+    """
+
+         
 def main():
     # Example usage
     repo_url = "https://github.com/Hanif-adedotun/semra-website"
@@ -234,4 +304,5 @@ def main():
         print(f"Repository context saved to {output_file}")
 
 if __name__ == "__main__":
-    main()
+    # main()
+    create_branch("https://github.com/Hanif-adedotun/semra-website", "hiro-tests")

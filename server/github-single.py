@@ -5,7 +5,7 @@
 # src/app/contact/page.tsx
 # src/app/articles/page.tsx
 # src/app/articles/[id]/page.tsx
-from  githubapi import  get_repo_tree, print_tree_structure, get_file_content
+from  githubapi import  get_repo_tree, create_branch, get_file_content
 from model import model, generate_code, ResponseFormatter
 import os
 from dotenv import load_dotenv
@@ -66,6 +66,8 @@ async def main():
          f.write(response['code'])
      
      print(f"Test file created at: {test_file_path}")
+     
+     create_branch("https://github.com/Hanif-adedotun/semra-website", "hiro-tests")
      
 
 if __name__ == "__main__":

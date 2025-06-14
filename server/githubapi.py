@@ -248,18 +248,66 @@ def create_branch(github_url: str, branch_name: str):
     else:
         return f"Failed to create branch: {response.json().get('message', 'Unknown error')}"
          
-def commit_test_changes(github_url: str, file_path: str):
-         """
-    Create a pull request from file changes
+def commit_test_changes(github_url: str, commit_message: str, file_path: str):
+    """
+    Commit test file changes to GitHub repository in the hiro-tests folder
     
     Args:
         github_url (str): The GitHub repository URL
-        file_path (str): Path to the file within the repository
+        commit_message (str): Message for the commit
+        file_path (str): Path to the test file within the repository
         
     Returns:
-        str: A success or failure message if the pull request was successfull
+        str: A success or failure message indicating if the commit was successful
     """
+    repo_info = get_repo_info_from_url(github_url)
     
+    # Get just the filename from the path
+    filename = os.path.basename(file_path)
+    
+    # Construct API URL for the file in hiro-tests folder
+    api_url = f"https://api.github.com/repos/{repo_info['owner']}/{repo_info['repo']}/contents/hiro-tests/{filename}"
+    
+    # Read and encode file content
+    with open(file_path, 'rb') as f:
+        base64content = base64.b64encode(f.read())
+    
+    # Get current file data to obtain SHA
+    headers = {'Authorization': f'token {GITHUB_TOKEN}'} if GITHUB_TOKEN else {}
+    response = requests.get(f"{api_url}?ref=hiro-tests", headers=headers)
+    
+    if response.status_code == 404:
+        # File doesn't exist yet, create new file
+        data = {
+            "message": commit_message,
+            "branch": "hiro-tests",
+            "content": base64content.decode('utf-8')
+        }
+    else:
+        # Update existing file
+        current_data = response.json()
+        data = {
+            "message": commit_message,
+            "branch": "hiro-tests",
+            "content": base64content.decode('utf-8'),
+            "sha": current_data['sha']
+        }
+    
+    # Commit changes
+    response = requests.put(
+        api_url,
+        headers={"Content-Type": "application/json", "Authorization": f"token {GITHUB_TOKEN}"},
+        json=data
+    )
+    
+    # Add delay after API call
+    time.sleep(API_DELAY)
+    
+    if response.status_code in [200, 201]:
+        return f"Successfully committed changes to hiro-tests/{filename}"
+    else:
+        return f"Failed to commit changes: {response.json().get('message', 'Unknown error')}"
+         
 def create_pull_request(github_url: str, file_path: str):
     """
     Create a pull request from file changes
@@ -304,5 +352,6 @@ def main():
         print(f"Repository context saved to {output_file}")
 
 if __name__ == "__main__":
-    # main()
-    create_branch("https://github.com/Hanif-adedotun/semra-website", "hiro-tests")
+    main()
+    # create_branch("https://github.com/Hanif-adedotun/semra-website", "hiro-tests")
+    # commit_test_changes("https://github.com/Hanif-adedotun/semra-website", "generated test cases", "hiro-tests/test_prayers.tsx")

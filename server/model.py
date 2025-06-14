@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 class ResponseFormatter(BaseModel):
     """Always use this tool to structure your response to the user."""
-    metadata: str = Field(description="Additional information needed to run the unit tests")
+    metadata: str = Field(description="Additional information needed to run the unit tests. Write this in markdown format")
     code: str = Field(description="The generated code for the user's request. Only code, no additional text.")
     packages: list[str] = Field(description="List of required packages for the code. Package names only.")
 

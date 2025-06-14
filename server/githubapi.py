@@ -323,7 +323,8 @@ def create_pull_request(github_url: str, file_path: str):
          
 def main():
     # Example usage
-    repo_url = "https://github.com/Hanif-adedotun/semra-website"
+    # repo_url = "https://github.com/Hanif-adedotun/semra-website"
+    repo_url = "https://github.com/Hanif-adedotun/ecommerce-golang"
     repo_name = repo_url.split('/')[-1]
     
     # Get and print the tree structure
@@ -331,7 +332,8 @@ def main():
     tree_data = get_repo_tree(repo_url)
     print_tree_structure(tree_data)
     
-    folder = "src/app"
+    # folder = "src/app"
+    folder = ""
     
     print("\nRepository Structure with Content:")
     full_context = []
@@ -339,7 +341,6 @@ def main():
     
     # Join all content with newlines
     full_context_str = "\n".join(full_context)
-    print(full_context_str)
     
     # Save the full context to a file
     if full_context:

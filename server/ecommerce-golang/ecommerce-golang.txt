@@ -1,0 +1,428 @@
+
+=== File: Dockerfile ===
+# syntax=docker/dockerfile:1
+
+FROM golang:1.23.1
+
+WORKDIR /app
+
+# Download Go modules
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the source code. Note the slash at the end, as explained in
+# https://docs.docker.com/reference/dockerfile/#copy
+COPY *.go ./
+
+# Build
+RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping
+
+COPY /application ./application
+COPY /db ./db
+COPY /handler ./handler
+
+# Optional:
+# To bind to a TCP port, runtime parameters must be supplied to the docker command.
+# But we can document in the Dockerfile what ports
+# the application is going to listen on by default.
+# https://docs.docker.com/reference/dockerfile/#expose
+EXPOSE 8080
+
+# Run
+CMD ["/docker-gs-ping"]
+
+=== File: README.md ===
+# An ecommerce microservice built using golang
+---
+
+## Technologies used
+- Docker
+- gRPC
+- Google cloud Run
+- Google cloud SQL (Postgres)
+
+## Link
+Test link coming out soon
+
+=== File: app.go ===
+package application
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"log"
+	"net/http"
+	"time"
+
+	db "github.com/hanif-adedotun/ecommerce-golang/db"
+)
+
+type App struct {
+	router http.Handler
+	db     *sql.DB
+}
+
+func New() *App {
+	dbConn, err := db.ConnectDB()
+	if err != nil {
+		// Handle the error (e.g., log it and exit)
+		log.Fatal(err)
+	}
+	app := &App{
+		db: dbConn,
+	}
+
+	app.loadRoutes()
+	return app
+}
+
+func (a *App) Start(ctx context.Context) error {
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: a.router,
+	}
+
+	defer func() {
+		if err := a.db.Close(); err != nil {
+			fmt.Println("Failed to close Postgres", err)
+		}
+	}()
+
+	fmt.Println("Starting server...")
+
+	ch := make(chan error, 1)
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil {
+			ch <- fmt.Errorf("could not start server: %w", err)
+		}
+		close(ch)
+	}()
+	var err error // Declare err variable
+	select {
+	case err = <-ch:
+		return err
+	case <-ctx.Done():
+		timeout, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
+		return server.Shutdown(timeout)
+	}
+}
+
+
+=== File: routes.go ===
+package application
+
+import (
+	"net/http"
+
+	"github.com/hanif-adedotun/ecommerce-golang/db"
+	"github.com/hanif-adedotun/ecommerce-golang/handler"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+)
+
+func (a *App) loadRoutes(){
+	router := chi.NewRouter()
+	router.Use(middleware.Logger)
+
+	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
+	router.Route("/orders", a.loadOrderRoute)
+
+	a.router = router
+}
+
+func (a *App) loadOrderRoute(router chi.Router) {
+	orderHandler := &handler.Order{
+		Repo : &db.PostgreRepo{
+			Client: a.db,
+		},
+	}
+
+	// All routes for the order handler 
+	// All path is orders/
+	router.Post("/", orderHandler.Create)
+	router.Get("/", orderHandler.List)
+	router.Get("/{id}", orderHandler.GetbyID)
+	router.Put("/{id}", orderHandler.UpdatebyID)
+	router.Delete("/{id}", orderHandler.DeletebyID)
+}
+
+
+=== File: db.go ===
+package db
+
+import (
+	"database/sql"
+	"fmt"
+
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+
+	// Note: If connecting using the App Engine Flex Go runtime, use
+	// "github.com/jackc/pgx/stdlib" instead, since v5 requires
+	// Go modules which are not supported by App Engine Flex.
+	_ "github.com/jackc/pgx/v5/stdlib"
+)
+
+
+// connectTCPSocket initializes a TCP connection pool for a Cloud SQL
+// instance of Postgres.
+func ConnectDB() (*sql.DB, error) {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	mustGetenv := func(k string) string {
+		v := os.Getenv(k)
+		if v == "" {
+			log.Fatalf("Fatal Error in connect_tcp.go: %s environment variable not set.", k)
+		}
+		return v
+	}
+	// Note: Saving credentials in environment variables is convenient, but not
+	// secure - consider a more secure solution such as
+	// Cloud Secret Manager (https://cloud.google.com/secret-manager) to help
+	// keep secrets safe.
+	var (
+		dbUser    = mustGetenv("DB_USER")       
+		dbPwd     = mustGetenv("DB_PASS")       
+		dbTCPHost = mustGetenv("INSTANCE_HOST")
+		dbPort    = mustGetenv("DB_PORT")     
+		dbName    = mustGetenv("DB_NAME")      
+	)
+
+	dbURI := fmt.Sprintf("host=%s user=%s password=%s port=%s database=%s",
+		dbTCPHost, dbUser, dbPwd, dbPort, dbName)
+
+	// dbPool is the pool of database connections.
+	dbPool, err := sql.Open("pgx", dbURI)
+	if err != nil {
+		return nil, fmt.Errorf("sql.Open: %w", err)
+	}
+
+	// Create our orders table
+
+	fmt.Println("Postgres DB Connected successfully")
+
+	return dbPool, nil
+}
+
+
+=== File: order.go ===
+package db
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+
+	// "encoding/json"
+	"fmt"
+
+	"github.com/hanif-adedotun/ecommerce-golang/model"
+)
+
+type PostgreRepo struct {
+	Client *sql.DB
+}
+
+func (p *PostgreRepo) Insert(ctx context.Context, order model.Order) (int64, error) {
+	lineItems, err := json.Marshal(order.LineItems)
+	if err != nil {
+		return 0, fmt.Errorf("failed to encode order: %w", err)
+	}
+	result, err := p.Client.Exec("INSERT INTO orders (order_id, customer_id, created_at, shipped_at, delivered_at) VALUES (?, ?, ?, ?, ?)", order.OrderID, order.CustomerID, order.CreatedAt, order.DeliveredAt, order.ShippedAt)
+	if err != nil {
+		return 0, fmt.Errorf("CreateOrder: %v", err)
+	}
+
+	// Use transactions to add line items to the lineitemsDB
+	fmt.Println("Order lineItems:", lineItems)
+
+	// Get the new order's generated ID for the client.
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, fmt.Errorf("CreateOrder: %v", err)
+	}
+	// Return the new album's ID.
+	return id, err
+
+}
+
+
+=== File: go.mod ===
+module github.com/hanif-adedotun/ecommerce-golang
+
+go 1.23.1
+
+require (
+	github.com/go-chi/chi/v5 v5.1.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
+	github.com/jackc/pgx/v5 v5.7.1 // indirect
+	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
+	golang.org/x/crypto v0.27.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
+	golang.org/x/text v0.18.0 // indirect
+)
+
+
+=== File: go.sum ===
+github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/go-chi/chi/v5 v5.1.0 h1:acVI1TYaD+hhedDJ3r54HyA6sExp3HfXq7QWEEY/xMw=
+github.com/go-chi/chi/v5 v5.1.0/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=
+github.com/jackc/pgpassfile v1.0.0/go.mod h1:CEx0iS5ambNFdcRtxPj5JhEz+xB6uRky5eyVu/W2HEg=
+github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 h1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo=
+github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761/go.mod h1:5TJZWKEWniPve33vlWYSoGYefn3gLQRzjfDlhSJ9ZKM=
+github.com/jackc/pgx/v5 v5.7.1 h1:x7SYsPBYDkHDksogeSmZZ5xzThcTgRz++I5E+ePFUcs=
+github.com/jackc/pgx/v5 v5.7.1/go.mod h1:e7O26IywZZ+naJtWWos6i6fvWK+29etgITqrqHLfoZA=
+github.com/jackc/puddle/v2 v2.2.2 h1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo=
+github.com/jackc/puddle/v2 v2.2.2/go.mod h1:vriiEXHvEE654aYKXXjOvZM39qJ0q+azkZFrfEOc3H4=
+github.com/joho/godotenv v1.5.1 h1:7eLL/+HRGLY0ldzfGMeQkb7vMd0as4CfYvUVzLqw0N0=
+github.com/joho/godotenv v1.5.1/go.mod h1:f4LDr5Voq0i2e/R5DDNOoa2zzDfwtkZa6DnEwAbqwq4=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
+github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+golang.org/x/crypto v0.27.0 h1:GXm2NjJrPaiv/h1tb2UH8QfgC/hOf/+z0p6PT8o1w7A=
+golang.org/x/crypto v0.27.0/go.mod h1:1Xngt8kV6Dvbssa53Ziq6Eqn0HqbZi5Z6R0ZpwQzt70=
+golang.org/x/sync v0.8.0 h1:3NFvSEYkUoMifnESzZl15y791HH1qU2xm6eCJU5ZPXQ=
+golang.org/x/sync v0.8.0/go.mod h1:Czt+wKu1gCyEFDUtn0jG5QVvpJ6rzVqr5aXyt9drQfk=
+golang.org/x/text v0.18.0 h1:XvMDiNzPAl0jr17s6W9lcaIhGUfUORdGCNsuLmPG224=
+golang.org/x/text v0.18.0/go.mod h1:BuEKDfySbSR4drPmRPG/7iBdf8hvFMuRexcpahXilzY=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
+
+
+=== File: order.go ===
+package handler
+
+import (
+	"encoding/json"
+	"fmt"
+	"math/rand/v2"
+	"net/http"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/hanif-adedotun/ecommerce-golang/db"
+	"github.com/hanif-adedotun/ecommerce-golang/model"
+)
+
+// This package handles all the routing for orders
+// Creating, listing, updating and deleting orders
+
+type Order struct {
+	Repo *db.PostgreRepo
+}
+
+func (o *Order) Create(w http.ResponseWriter, r *http.Request) {
+
+	var body struct {
+		CustomerID uuid.UUID        `json:"customer_id"`
+		LineItems  []model.LineItem `json:"lineitems"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	now := time.Now().UTC()
+
+	order := model.Order{
+		OrderID:    rand.Uint64(),
+		CustomerID: body.CustomerID,
+		LineItems:  body.LineItems,
+		CreatedAt:  &now,
+	}
+
+	id, err := o.Repo.Insert(r.Context(), order)
+	if err != nil {
+		fmt.Println("Unable to insert order")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	fmt.Printf("successfully created order %d order", id)
+	w.WriteHeader(http.StatusCreated)
+}
+
+func (o *Order) List(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("List all orders")
+}
+
+func (o *Order) GetbyID(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Get an order by ID")
+}
+
+func (o *Order) UpdatebyID(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Update an order by ID")
+}
+
+func (o *Order) DeletebyID(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Delete an order by ID")
+}
+
+
+=== File: main.go ===
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"os/signal"
+
+	application "github.com/hanif-adedotun/ecommerce-golang/application"
+)
+
+func main() {
+	// Connect to DB first
+	// Connect to routers
+	app := application.New()
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+	err := app.Start(ctx)
+	if err != nil {
+		fmt.Println("Failed to start app:", err)
+	}
+
+}
+
+
+=== File: order.go ===
+package model
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type Order struct {
+	OrderID    uint64 `json:"order_id"`
+	CustomerID uuid.UUID `json:"customer_id"`
+	LineItems  []LineItem `json:"lineitems"`
+	CreatedAt *time.Time `json:"created_at"`
+	ShippedAt *time.Time`json:"shipped_at"`
+	DeliveredAt *time.Time`json:"delivered_at"`
+}
+
+type LineItem struct {
+	ItemID   uuid.UUID `json:"item_id"`
+	Quantity int `json:"quantity"`
+	Price    int`json:"price"`
+}

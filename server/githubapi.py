@@ -315,7 +315,7 @@ def create_pull_request(github_url: str, file_path: str):
     """
 
          
-def main():
+async def main():
     # Example usage
     # repo_url = "https://github.com/Hanif-adedotun/semra-website"
     repo_url = "https://github.com/Hanif-adedotun/ecommerce-golang"
@@ -324,9 +324,9 @@ def main():
     # Get and print the tree structure
     print("\nRepository Tree Structure:")
     tree_data = get_repo_tree(repo_url)
-    file_paths = print_tree_structure(tree_data)
+    print_tree_structure(tree_data)
     
-    # # folder = "src/app"
+    # folder = "src/app"
     folder = ""
     
     # print("\nRepository Structure with Content:")
@@ -335,18 +335,19 @@ def main():
     print("\nAll files:")
     print(all_files)
     
-    # # Join all content with newlines
-    # full_context_str = "\n".join(full_context)
+    # Join all content with newlines
+    full_context_str = "\n".join(full_context)
     
-    # # Save the full context to a file
-    # if full_context:
-    #     output_dir = os.path.join(os.path.dirname(__file__), repo_name)
-    #     os.makedirs(output_dir, exist_ok=True)
+    
+    # Save the full context to a file
+    if full_context:
+        output_dir = os.path.join(os.path.dirname(__file__), repo_name)
+        os.makedirs(output_dir, exist_ok=True)
         
-    #     output_file = os.path.join(output_dir, f'{repo_name}.txt')
-    #     with open(output_file, 'w', encoding='utf-8') as f:
-    #         f.write(full_context_str)
-    #     print(f"Repository context saved to {output_file}")
+        output_file = os.path.join(output_dir, f'{repo_name}.txt')
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(full_context_str)
+        print(f"Repository context saved to {output_file}")
 
 if __name__ == "__main__":
     main()

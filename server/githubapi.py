@@ -14,6 +14,7 @@ GITHUB_TOKEN = os.getenv('GITHUB_PERSONAL_ACCESS_TOKEN')
 
 # Add a delay constant
 API_DELAY = 1 
+skip_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.pdf', '.avif', '.lock', '.gitignore', '.env', '.yml', '.yaml', 'Dockerfile', '.md'}
 
 def get_repo_info_from_url(github_url: str):
     """
@@ -97,7 +98,7 @@ def get_repo_tree(github_url: str, recursive: bool = True):
 
 def print_tree_structure(tree_data: Dict[str, Any], indent: int = 0):
     """
-    Print the tree structure in a readable format.
+    Print only files in the tree structure and return their paths.
     
     Args:
         tree_data (Dict[str, Any]): The tree data from GitHub API
@@ -114,7 +115,7 @@ def print_tree_structure(tree_data: Dict[str, Any], indent: int = 0):
         if item['type'] == 'tree' and 'children' in item:
             print_tree_structure({'tree': item['children']}, indent + 4)
 
-def print_repository_structure(github_url: str, full_context: list, path: str = '', indent: int = 0, target_folder: str = None):
+def print_repository_structure(github_url: str, full_context: list[str], all_files:list[str], path: str = '', indent: int = 0, target_folder: str = None):
     """
     Recursively print the repository structure showing directories and files.
     Also collects file contents into a text file.
@@ -130,29 +131,22 @@ def print_repository_structure(github_url: str, full_context: list, path: str = 
         list: The updated full_context list
     """
     items = get_repository_files(github_url, path)
-    all_content = []
     
     for item in items:
         print(' ' * indent + '├── ' + item['name'])
         
         if item['type'] == 'file':
             # Skip non-code files
-            skip_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.pdf', '.avif', '.lock', '.gitignore', '.env', '.yml', '.yaml'}
-            if any(item['name'].lower().endswith(ext) for ext in skip_extensions):
+            if any(item['name'].lower().endswith(ext) or item['name'] == ext for ext in skip_extensions) :
                 continue
                     
             try:
                 file_content = get_file_content(github_url, f"{path}/{item['name']}" if path else item['name'])
                 content_to_write = f"\n=== File: {item['name']} ===\n{file_content}"
                 full_context.append(content_to_write)
+                all_files.append(f"{path}/{item['name']}" if path else item['name'])
                 print(f"\nAdding context of {item['name']}: ")
                 
-                # # Write content immediately if this is the target folder
-                # if output_file:
-                #     output_path = os.path.join(os.getcwd(), output_file)
-                #     with open(output_path, 'a', encoding='utf-8') as f:
-                #         f.write(content_to_write)
-                #     print(f"Added content from: {item['name']}")
             except Exception as e:
                 error_msg = f"\n=== Error reading file {item['name']}: {str(e)} ===\n"
                 # print(error_msg.strip())
@@ -163,13 +157,13 @@ def print_repository_structure(github_url: str, full_context: list, path: str = 
         
         if item['type'] == 'dir':
             new_path = f"{path}/{item['name']}" if path else item['name']
-            print_repository_structure(github_url, full_context, new_path, indent + 4, target_folder)
+            print_repository_structure(github_url, full_context, all_files, new_path, indent + 4, target_folder)
     
     # Print completion message if this is the target folder
     # if path == target_folder:
     #     output_path = os.path.join(os.getcwd(), output_file)
     #     print(f"\nSuccessfully saved all content to: {output_path}")
-    return full_context
+    return full_context, all_files
 
 def get_file_content(github_url: str, file_path: str):
     """
@@ -330,27 +324,29 @@ def main():
     # Get and print the tree structure
     print("\nRepository Tree Structure:")
     tree_data = get_repo_tree(repo_url)
-    print_tree_structure(tree_data)
+    file_paths = print_tree_structure(tree_data)
     
-    # folder = "src/app"
+    # # folder = "src/app"
     folder = ""
     
-    print("\nRepository Structure with Content:")
-    full_context = []
-    full_context = print_repository_structure(repo_url, full_context, folder)
+    # print("\nRepository Structure with Content:")
+    full_context, all_files = [], []
+    full_context,all_files = print_repository_structure(repo_url, full_context,all_files, folder)
+    print("\nAll files:")
+    print(all_files)
     
-    # Join all content with newlines
-    full_context_str = "\n".join(full_context)
+    # # Join all content with newlines
+    # full_context_str = "\n".join(full_context)
     
-    # Save the full context to a file
-    if full_context:
-        output_dir = os.path.join(os.path.dirname(__file__), repo_name)
-        os.makedirs(output_dir, exist_ok=True)
+    # # Save the full context to a file
+    # if full_context:
+    #     output_dir = os.path.join(os.path.dirname(__file__), repo_name)
+    #     os.makedirs(output_dir, exist_ok=True)
         
-        output_file = os.path.join(output_dir, f'{repo_name}.txt')
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(full_context_str)
-        print(f"Repository context saved to {output_file}")
+    #     output_file = os.path.join(output_dir, f'{repo_name}.txt')
+    #     with open(output_file, 'w', encoding='utf-8') as f:
+    #         f.write(full_context_str)
+    #     print(f"Repository context saved to {output_file}")
 
 if __name__ == "__main__":
     main()

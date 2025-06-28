@@ -6,9 +6,53 @@ import Savings from "../assets/languages/nextjs.svg";
 import Gift from "../assets/languages/python.svg";
 import Typewriter from "astro-typewriter";
 import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { ArrowRight } from "@lucide/astro";
 ---
 
-<section class="product-hero">
+<section>
+  <header class="relative z-10 w-full mx-auto px-8">
+    <div class="pt-20 pb-14 flex flex-col items-center text-center">
+      <Badge
+        className="inline-block mb-6 px-8 py-4 bg-orange-900/60 text-orange-400 font-semibold rounded-full text-sm tracking-wide uppercase"
+      >
+        AI-Powered Test Generation & Documentation
+      </Badge>
+      <h1
+        class="text-5xl font-extrabold text-white leading-tight mb-6 max-w-[60%]"
+      >
+        Let AI handle<br class="hidden md:block" />
+        <span
+          class="text-transparent bg-gradient-to-tr from-orange-400 via-yellow-400 to-orange-200 bg-clip-text drop-shadow-lg"
+          >your testing</span
+        >, so you can <span class="text-white">focus on building.</span>
+      </h1>
+      <p class="text-lg text-zinc-300 mb-8 max-w-[50%]">
+        Hiro automatically writes comprehensive unit tests and requirement
+        documentation for any codebase. Language agnostic. Zero setup. Always in
+        sync.
+      </p>
+      <span class="font-semibold relative px-2"> free for 7 days. </span>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-2">
+      <a
+        href="#"
+        class="inline-flex items-center gap-2 px-7 py-3 rounded-xl font-semibold bg-gradient-to-r from-orange-500 via-yellow-400 to-orange-400 text-black shadow-xl shadow-orange-900/30 hover:from-orange-600 hover:to-yellow-500 transition-all hover:scale-105 text-base"
+      >
+        Try Beta
+        <ArrowRight size={20} class="-mr-1" />
+      </a>
+      <a
+        href="#features"
+        class="inline-flex items-center gap-2 px-7 py-3 font-semibold text-white bg-zinc-900/80 border border-orange-800 hover:bg-zinc-900/90 hover:border-orange-400 rounded-xl shadow transition-all hover:scale-105 text-base"
+      >
+        See Features
+      </a>
+    </div>
+  </header>
+</section>
+
+<!-- <section class="product-hero">
   <div class="container">
     <div class="d-table">
       <div class="d-table-cell center">
@@ -23,7 +67,7 @@ import { Button } from "./ui/button";
             programming language or testing framework.
           </p>
           <div class="product-cta">
-            <Button variant={"default"} className="u-full-width">
+            <Button variant={"default"} class="u-full-width">
               Try Hiro — It's Free
             </Button>
           </div>
@@ -38,7 +82,7 @@ import { Button } from "./ui/button";
       <img src={Gift.src} alt="Gift" />
     </div>
   </div>
-</section>
+</section> -->
 
 <!-- <script>
   const text = "Generate Test Cases at One Click with AI";
@@ -57,79 +101,3 @@ import { Button } from "./ui/button";
   // Start the animation when the component is mounted
   document.addEventListener("DOMContentLoaded", typeWriter);
 </script> -->
-
-<style lang="scss">
-  .product-hero {
-    padding: 100px 0;
-    background: "linear-gradient(135deg, #181818 50%, #202023 100%, #181818 120%)";
-
-    .container {
-      position: relative;
-      .d-table {
-        height: 500px;
-      }
-    }
-    .hero-media {
-      padding: 5px;
-      border-radius: 48px;
-    }
-    .hero-copy {
-      h1,
-      p {
-        max-width: 600px;
-        margin: 20px auto;
-        color: white;
-      }
-    }
-    .typing-animation {
-      min-height: 0.5em;
-      border-right: 2px solid white;
-      animation: blink 0.75s step-end infinite;
-    }
-    @keyframes blink {
-      from,
-      to {
-        border-color: transparent;
-      }
-      50% {
-        border-color: white;
-      }
-    }
-    .hero-media {
-      img {
-        position: absolute;
-        width: 160px;
-        &:nth-child(1) {
-          top: 0;
-          left: -100px;
-        }
-        &:nth-child(2) {
-          top: 0;
-          right: -100px;
-        }
-        &:nth-child(3) {
-          top: 250px;
-          left: 0;
-        }
-        &:nth-child(4) {
-          top: 250px;
-          right: 0;
-        }
-        &:nth-child(5) {
-          bottom: -20px;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-      }
-      @media (max-width: 700px) {
-        img {
-          &:nth-child(2),
-          &:nth-child(3),
-          &:nth-child(4) {
-            display: none;
-          }
-        }
-      }
-    }
-  }
-</style>

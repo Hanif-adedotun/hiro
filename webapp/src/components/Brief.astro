@@ -3,158 +3,76 @@ import VectorOne from "../assets/ui-one.svg";
 import VectorTwo from "../assets/ui-two.svg";
 import VectorThree from "../assets/ui-three.svg";
 
-import Check from "../assets/check.svg";
 import Bolt from "../assets/bolt.svg";
 import Money from "../assets/money.svg";
 import Wallet from "../assets/wallet.svg";
 import Secure from "../assets/lock.svg";
+import { featureList } from "./data/features";
 ---
 
 <section class="product-brief" id="features">
   <div class="container">
     <!-- Feature Two -->
-    <div class="row product-brief-items">
-      <div class="brief-media center one-half column">
-        <img src={VectorTwo.src} class="md-width" />
-      </div>
 
-      <div class="brief-tab one-half column">
-        <h3 class="h2-title">Better, together.</h3>
-        <p class="m-paragraph m-margin">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-          varius enim in eros elementum tristique.
-        </p>
-
-        <div class="brief-items">
-          <div class="row m-margin">
-            <div class="one-half column feature-grid">
-              <img src={Bolt.src} alt="Fast connect" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
+    {
+      featureList.map((feature, i) => (
+        <div class="row product-brief-items">
+          {i % 2 === 0 && (
+            <div class="brief-media center one-half column border-dotted border-4 border-orange-400">
+              <img src={VectorTwo.src} class="md-width" />
             </div>
-            <div class="one-half column feature-grid">
-              <img src={Money.src} alt="Money transfer" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
+          )}
+
+          <div class="brief-tab one-half column text-white">
+            <h3 class="h2-title">{feature.title}</h3>
+            <p class="m-paragraph m-margin">{feature.description}</p>
+
+            <div class="brief-items">
+              <div class="row m-margin">
+                <div class="one-half column feature-grid">
+                  <img src={Bolt.src} alt="Fast connect" />
+                  <p class="s-paragraph">
+                    Lorem ipsum dolor sit amet, consectetur.
+                  </p>
+                </div>
+                <div class="one-half column feature-grid">
+                  <img src={Money.src} alt="Money transfer" />
+                  <p class="s-paragraph">
+                    Lorem ipsum dolor sit amet, consectetur.
+                  </p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="one-half column feature-grid">
+                  <img src={Wallet.src} alt="Digital wallet" />
+                  <p class="s-paragraph">
+                    Lorem ipsum dolor sit amet, consectetur.
+                  </p>
+                </div>
+                <div class="one-half column feature-grid">
+                  <img src={Secure.src} alt="Secure connection" />
+                  <p class="s-paragraph">
+                    Lorem ipsum dolor sit amet, consectetur.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="row">
-            <div class="one-half column feature-grid">
-              <img src={Wallet.src} alt="Digital wallet" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
+
+          {i % 2 === 1 && (
+            <div class="brief-media center one-half column border-dotted border-4 border-orange-400">
+              <img src={VectorTwo.src} class="md-width" />
             </div>
-            <div class="one-half column feature-grid">
-              <img src={Secure.src} alt="Secure connection" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
-            </div>
-          </div>
+          )}
         </div>
-      </div>
-    </div>
-
-    <!-- Feature One -->
-    <div class="row product-brief-items">
-      <div class="brief-tab one-half column">
-        <h3 class="h2-title">Better, together.</h3>
-        <p class="m-paragraph m-margin">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-          varius enim in eros elementum tristique.
-        </p>
-
-        <div class="brief-items">
-          <div class="row m-margin">
-            <div class="one-half column feature-grid">
-              <img src={Bolt.src} alt="Fast connect" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
-            </div>
-            <div class="one-half column feature-grid">
-              <img src={Money.src} alt="Money transfer" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
-            </div>
-          </div>
-          <div class="row">
-            <div class="one-half column feature-grid">
-              <img src={Wallet.src} alt="Digital wallet" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
-            </div>
-            <div class="one-half column feature-grid">
-              <img src={Secure.src} alt="Secure connection" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="brief-media center one-half column">
-        <img src={VectorOne.src} class="md-width" />
-      </div>
-    </div>
-
-    <!-- Feature One -->
-    <div class="row product-brief-items">
-      <div class="brief-media center one-half column">
-        <img src={VectorThree.src} class="md-width" />
-      </div>
-
-      <div class="brief-tab one-half column">
-        <h3 class="h2-title">Better, together.</h3>
-        <p class="m-paragraph m-margin">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-          varius enim in eros elementum tristique.
-        </p>
-
-        <div class="brief-items">
-          <div class="row m-margin">
-            <div class="one-half column feature-grid">
-              <img src={Bolt.src} alt="Fast connect" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
-            </div>
-            <div class="one-half column feature-grid">
-              <img src={Money.src} alt="Money transfer" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
-            </div>
-          </div>
-          <div class="row">
-            <div class="one-half column feature-grid">
-              <img src={Wallet.src} alt="Digital wallet" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
-            </div>
-            <div class="one-half column feature-grid">
-              <img src={Secure.src} alt="Secure connection" />
-              <p class="s-paragraph">
-                Lorem ipsum dolor sit amet, consectetur.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      ))
+    }
   </div>
 </section>
 
 <style lang="scss">
   .product-brief {
-    background-color: var(--tenary);
+    // background-color: var(--tenary);
     .hero-brand {
       padding-bottom: 50px;
       .brands {
@@ -180,11 +98,16 @@ import Secure from "../assets/lock.svg";
     }
 
     .brief-media {
-      height: 340px;
+      height: 400px;
       position: relative;
       overflow: hidden;
-      background-color: #f2f5f9;
-      padding-top: 40px;
+      background-color: #181818;
+      // padding-top: 40px;
+
+      border-radius: 20px;
+      img {
+        object-fit: cover;
+      }
     }
 
     @media (max-width: 700px) {

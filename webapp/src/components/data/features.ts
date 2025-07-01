@@ -1,17 +1,20 @@
 export const featureList = [
   {
-    title: "Better, together.",
+    title: "Language Agnostic Test Generation",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
+      "Hiro works seamlessly with any programming language or testing framework, enabling you to generate comprehensive unit tests regardless of your tech stack.",
+    image: "/features/test-cases.png",
   },
   {
-    title: "Better, together.",
+    title: "GitHub Integration & Continuous Testing",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
+      "Integrate effortlessly with GitHub to automate test generation and execution using GitHub Actions, ensuring your code is always tested with every change.",
+    image: "/features/test-cases.png",
   },
   {
-    title: "Better, together.",
+    title: "Automated Requirement Documentation",
     description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.",
+      "Automatically create detailed requirement documentation directly from your codebase, ensuring your docs are always up-to-date and in sync with your code.",
+    image: "/features/test-cases.png",
   },
 ];

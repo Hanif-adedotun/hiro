@@ -16,5 +16,6 @@ export const featureList = [
     description:
       "Automatically create detailed requirement documentation directly from your codebase, ensuring your docs are always up-to-date and in sync with your code.",
     image: "/features/test-cases.png",
+    coming_soon: true,
   },
 ];

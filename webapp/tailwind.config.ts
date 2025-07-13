@@ -29,6 +29,7 @@ export default {
         "4xl": "34px",
         "5xl": "46px",
         "6xl": "62px",
+        "7xl": "72px",
         "8xl": "90px",
       },
       colors: {

@@ -19,6 +19,7 @@ export default {
     },
     extend: {
       fontSize: {
+        xxs: "5px",
         xs: "10px",
         sm: "12px",
         base: "14px",

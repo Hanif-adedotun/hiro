@@ -1,126 +1,56 @@
 ---
-import VectorOne from "../assets/ui-one.svg";
-import VectorTwo from "../assets/ui-two.svg";
-import VectorThree from "../assets/ui-three.svg";
-
-import Bolt from "../assets/bolt.svg";
-import Money from "../assets/money.svg";
-import Wallet from "../assets/wallet.svg";
-import Secure from "../assets/lock.svg";
 import { featureList } from "./data/features";
 import { Badge } from "./ui/badge";
 ---
 
-<section class="product-brief" id="features">
+<section class="" id="features">
   <div class="container">
-    <!-- Feature Two -->
-
     {
       featureList.map((feature, i) => (
-        <div class="row product-brief-items items-center my-20">
-          {i % 2 === 0 && (
-            <div class="brief-media center one-half column border-dotted border-4 border-orange-400">
-              <img src={feature.image} class="object-contain w-full" />
-            </div>
-          )}
+        <div class="flex items-center mb-84">
+          {i % 2 === 1 ? (
+            <>
+              <div class="w-2/5 text-white">
+                <h3 class="text-3xl font-bold mb-4">
+                  {feature.title}{" "}
+                  {feature.coming_soon && (
+                    <Badge variant={"outline"} className="text-base mb-4">
+                      Coming Soon
+                    </Badge>
+                  )}
+                </h3>
 
-          <div class="brief-tab one-half column text-white">
-            <h3 class="h2-title">{feature.title} </h3>
-            {feature.coming_soon && (
-              <Badge variant={"outline"} className="text-base">
-                Coming Soon
-              </Badge>
-            )}
-
-            <p class="m-paragraph m-margin">{feature.description}</p>
-
-            {/* <div class="brief-items">
-              <div class="row m-margin">
-                <div class="one-half column feature-grid">
-                  <img src={Bolt.src} alt="Fast connect" />
-                  <p class="s-paragraph">
-                    Lorem ipsum dolor sit amet, consectetur.
-                  </p>
-                </div>
-                <div class="one-half column feature-grid">
-                  <img src={Money.src} alt="Money transfer" />
-                  <p class="s-paragraph">
-                    Lorem ipsum dolor sit amet, consectetur.
-                  </p>
+                <p class="text-lg leading-relaxed">{feature.description}</p>
+              </div>
+              <div class="w-3/5 pr-8">
+                <div class="border-dotted border-4 border-orange-400 rounded-2xl overflow-hidden bg-[#0a0a0a]">
+                  <img src={feature.image} class="object-contain w-full" />
                 </div>
               </div>
-              <div class="row">
-                <div class="one-half column feature-grid">
-                  <img src={Wallet.src} alt="Digital wallet" />
-                  <p class="s-paragraph">
-                    Lorem ipsum dolor sit amet, consectetur.
-                  </p>
-                </div>
-                <div class="one-half column feature-grid">
-                  <img src={Secure.src} alt="Secure connection" />
-                  <p class="s-paragraph">
-                    Lorem ipsum dolor sit amet, consectetur.
-                  </p>
+            </>
+          ) : (
+            <>
+              <div class="w-3/5 pr-8">
+                <div class="border-dotted border-4 border-orange-400 rounded-2xl overflow-hidden bg-[#0a0a0a]">
+                  <img src={feature.image} class="object-contain w-full" />
                 </div>
               </div>
-            </div> */}
-          </div>
+              <div class="w-2/5 text-white">
+                <h3 class="text-3xl font-bold mb-4">
+                  {feature.title}
+                  {feature.coming_soon && (
+                    <Badge variant={"outline"} className="text-base mb-4">
+                      Coming Soon
+                    </Badge>
+                  )}
+                </h3>
 
-          {i % 2 === 1 && (
-            <div class="brief-media center one-half column border-dotted border-4 border-orange-400">
-              <img src={feature.image} class="object-contain w-full" />
-            </div>
+                <p class="text-lg leading-relaxed">{feature.description}</p>
+              </div>
+            </>
           )}
         </div>
       ))
     }
   </div>
 </section>
-
-<style lang="scss">
-  .product-brief {
-    // background-color: var(--tenary);
-    .hero-brand {
-      padding-bottom: 50px;
-      .brands {
-        margin-top: 15px;
-      }
-    }
-    .product-brief-items {
-      margin-bottom: 100px;
-      .brief-tab {
-        padding-top: 50px;
-      }
-    }
-
-    .feature-grid {
-      display: flex;
-      p {
-        margin: 0 0 0 10px;
-      }
-      img {
-        width: 25px;
-        margin-top: -10px;
-      }
-    }
-
-    .brief-media {
-      height: 350px;
-      position: relative;
-      overflow: hidden;
-      background-color: #0a0a0a;
-      // padding-top: 40px;
-
-      border-radius: 20px;
-      img {
-        object-fit: cover;
-      }
-    }
-
-    @media (max-width: 700px) {
-      .brief-tab {
-        margin-left: 20px;
-      }
-    }
-  }
-</style>

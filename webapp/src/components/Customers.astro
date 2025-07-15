@@ -6,10 +6,10 @@ import Stars from "../assets/stars.svg";
   <div class="container">
     <div class="center">
       <div class="text-container text-white">
-        <h3 class="h1-title">Supports multiple languages</h3>
+        <h3 class="h1-title">Seamless Multi-Language Support</h3>
         <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Doloremque,
-          possimus deleniti illo corporie.
+          Instantly generate comprehensive unit tests and documentation for
+          Python, Java, Go, JavaScript, and more—no matter your tech stack.
         </p>
       </div>
 
@@ -22,54 +22,40 @@ import Stars from "../assets/stars.svg";
       </div> -->
       <div class="center">
         <a href="#" class="button button-primary">Try Beta</a>
-        <small class="block">No signup required.</small>
+        <small class="block text-muted-foreground"
+          >Focus on building, while Hiro handles the testing for you.</small
+        >
       </div>
     </div>
 
     <div class="customer-avatars">
       <div class="left-side-avatars">
-        <div class="circular-image">
-          <img
-            src="https://images.pexels.com/photos/1520760/pexels-photo-1520760.jpeg?auto=compress&cs=tinysrgb&w=800"
-          />
-        </div>
-        <div class="circular-image">
-          <img
-            src="https://images.pexels.com/photos/1493111/pexels-photo-1493111.jpeg?auto=compress&cs=tinysrgb&w=800"
-          />
-        </div>
-        <div class="circular-image">
-          <img
-            src="https://images.pexels.com/photos/2269872/pexels-photo-2269872.jpeg?auto=compress&cs=tinysrgb&w=800"
-          />
-        </div>
-        <div class="circular-image">
-          <img
-            src="https://images.pexels.com/photos/3058391/pexels-photo-3058391.jpeg?auto=compress&cs=tinysrgb&w=800"
-          />
-        </div>
+        {
+          [
+            "languages/flask.svg",
+            "languages/go.svg",
+            "languages/java.svg",
+            "languages/nodejs.svg",
+          ].map((v, i) => (
+            <div class="circular-image bg-orange-950 border-2 border-dotted border-orange-500 p-4">
+              <img src={v} />
+            </div>
+          ))
+        }
       </div>
       <div class="right-side-avatars">
-        <div class="circular-image">
-          <img
-            src="https://images.pexels.com/photos/12599059/pexels-photo-12599059.jpeg?auto=compress&cs=tinysrgb&w=800"
-          />
-        </div>
-        <div class="circular-image">
-          <img
-            src="https://images.pexels.com/photos/3394657/pexels-photo-3394657.jpeg?auto=compress&cs=tinysrgb&w=800"
-          />
-        </div>
-        <div class="circular-image">
-          <img
-            src="https://images.pexels.com/photos/3211476/pexels-photo-3211476.jpeg?auto=compress&cs=tinysrgb&w=800"
-          />
-        </div>
-        <div class="circular-image">
-          <img
-            src="https://images.pexels.com/photos/3756985/pexels-photo-3756985.jpeg?auto=compress&cs=tinysrgb&w=800"
-          />
-        </div>
+        {
+          [
+            "languages/python.svg",
+            "languages/nextjs-line.svg",
+            "languages/atom-original.svg",
+            "languages/php-plain.svg",
+          ].map((v, i) => (
+            <div class="circular-image bg-orange-950 border-2 border-dotted border-orange-500 p-4">
+              <img src={v} />
+            </div>
+          ))
+        }
       </div>
     </div>
   </div>

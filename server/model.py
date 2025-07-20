@@ -16,7 +16,6 @@ load_dotenv('.env')
 
 # Get API key with error handling
 GROQ_API_KEY = os.environ['GROQ_API_KEY']
-# TODO: remove this, only for test
 
 
 if not GROQ_API_KEY:
@@ -51,7 +50,7 @@ async def model():
     
     llm = ChatGroq(
         api_key= GROQ_API_KEY,
-        model="deepseek-r1-distill-llama-70b",
+        model="llama-3.3-70b-versatile",
         temperature=0.9,
         max_retries=2,
     )

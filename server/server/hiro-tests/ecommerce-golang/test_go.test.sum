@@ -1,0 +1,26 @@
+package db
+
+import (
+	"database/sql"
+	"testing"
+)
+
+func TestConnectDB(t *testing.T) {
+	// Arrange
+	var dbUser = "testuser"
+	var dbPwd = "testpassword"
+	var dbTCPHost = "localhost"
+	var dbPort = "5432"
+	var dbName = "testdb"
+	os.Setenv("DB_USER", dbUser)
+	os.Setenv("DB_PASS", dbPwd)
+	os.Setenv("INSTANCE_HOST", dbTCPHost)
+	os.Setenv("DB_PORT", dbPort)
+	os.Setenv("DB_NAME", dbName)
+	// Act
+	_, err := ConnectDB()
+	// Assert
+	if err != nil {
+		t.Errorf("ConnectDB() error = %v", err)
+	}
+}

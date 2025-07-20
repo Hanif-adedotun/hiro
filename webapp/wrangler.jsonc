@@ -4,6 +4,6 @@
   // Update to today's date
   "compatibility_date": "2025-05-08",
   "assets": {
-    "directory": "/dist"
+    "directory": "./dist"
   }
 }

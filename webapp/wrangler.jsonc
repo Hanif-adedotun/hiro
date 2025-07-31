@@ -1,8 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "hiro-v2",
+  "name": "hiro",
   // Update to today's date
-  "compatibility_date": "2025-05-08",
+  "compatibility_date": "2025-05-13",
   "assets": {
     "directory": "./dist"
   }

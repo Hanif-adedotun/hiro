@@ -24,6 +24,10 @@ export default defineConfig({
     },
   },
 
+  experimental: {
+    session: true
+  },
+
   image: {
     service: {
       entrypoint: 'astro/assets/services/cloudflare'

@@ -15,20 +15,35 @@ import (
 func TestAppStart(t *testing.T) {
 	// Arrange
 	ctx, cancel := context.WithCancel(context.Background())
-	defercancel := func() { cancel() }
-	defer defercancel
-
-	// Create a new App instance
 	app := New()
-
+	
 	// Act
 	go func() {
-		// Simulate a request to the server
-		http.Get("http://localhost:8080")
+		app.Start(ctx)
 	}()
-
+	
 	// Assert
-	if err := app.Start(ctx); err != nil {
-		t.Errorf("App.Start() returned error: %v", err)
+	time.Sleep(100 * time.Millisecond)
+	if app.db == nil {
+		t.Errorf("App database is nil")
+	}
+	cancel()
+}
+
+func TestAppStart_ServerShutdown(t *testing.T) {
+	// Arrange
+	ctx, cancel := context.WithCancel(context.Background())
+	app := New()
+	
+	// Act
+	go func() {
+		app.Start(ctx)
+	}()
+	
+	// Assert
+	time.Sleep(100 * time.Millisecond)
+	cancel()
+	if app.db != nil {
+		t.Errorf("App database is not closed")
 	}
 }

@@ -5,6 +5,13 @@ from dotenv import load_dotenv
 import json
 from datetime import datetime
 
+from  githubapi import  get_repo_tree, create_branch, get_file_content, commit_test_changes, print_tree_structure, print_repository_structure
+from model import model, generate_code, ResponseFormatter
+from githubapi import get_repository_files
+
+import asyncio
+import time
+
 # Load environment variables
 load_dotenv()
 
@@ -92,15 +99,9 @@ def main():
             help="Enter your GROQ API key for AI model access"
         )
         
-        google_api_key = st.text_input(
-            "Google API Key (Optional)",
-            type="password",
-            help="Enter your Google API key if using Google services"
-        )
-        
         # Save configuration
         if st.button("💾 Save Configuration"):
-            save_configuration(github_token, groq_api_key, google_api_key)
+            save_configuration(github_token, groq_api_key)
     
     # Main content area
     if not github_token:
@@ -130,14 +131,30 @@ def main():
             placeholder="https://github.com/username/repository",
             help="Enter the full URL of the GitHub repository you want to generate tests for"
         )
-    
-    with col2:
-        if st.button("🔍 Validate Repository", type="primary"):
-            if validate_repository(repo_url, github_token):
-                st.success("✅ Repository is accessible")
+        
+        # Show validation status near the input
+        if repo_url:
+            repository_validated = st.session_state.get('repository_validated', False)
+            validated_repo_url = st.session_state.get('validated_repo_url', '')
+            
+            if repository_validated and validated_repo_url == repo_url:
+                st.success("✅ Repository validated")
+            elif repository_validated and validated_repo_url != repo_url:
+                st.warning("⚠️ Repository URL changed - re-validate needed")
             else:
-                st.error("❌ Repository not accessible or invalid URL")
+                st.info("ℹ️ Click 'Validate Repository' to proceed")
     
+        with col2:
+            if st.button("🔍 Validate Repository", type="primary"):
+                if validate_repository(repo_url, github_token):
+                    st.session_state.repository_validated = True
+                    st.session_state.validated_repo_url = repo_url
+                    st.success("✅ Repository is accessible")
+                else:
+                    st.session_state.repository_validated = False
+                    st.error("❌ Repository not accessible or invalid URL")
+    
+    st.markdown("<div style='padding: 24px 0;'></div>", unsafe_allow_html=True)
     # Test generation options
     if repo_url:
         st.header("🧪 Test Generation Options")
@@ -159,11 +176,27 @@ def main():
             )
         
         with col3:
-            include_docs = st.checkbox(
-                "Generate Documentation",
-                value=True,
-                help="Also generate requirement documentation"
-            )
+            # After repository validation, list folders using get_repository_files
+            folders = []
+            if repo_url and st.session_state.get('repository_validated', False):
+                
+                try:
+                    repo_files = get_repository_files(repo_url, path="")
+                    # Only include folders/directories
+                    folders = [item['path'] for item in repo_files if item['type'] == 'dir']
+                except Exception as e:
+                    st.warning(f"Could not fetch folders: {e}")
+            if folders:
+                test_folder = st.selectbox(
+                    "Folder",
+                    options=[""] + folders,
+                    help="Select a specific folder to limit tests (leave blank for all)"
+                )
+            else:
+                test_folder = st.text_input(
+                    "Folder",
+                    help="Enter specific folder to limit tests e.g. src/app"
+                )
         
         # Advanced options
         with st.expander("⚙️ Advanced Options"):
@@ -200,45 +233,59 @@ def main():
                 )
         
         # Generate tests button
-        if st.button("🚀 Generate Tests", type="primary", use_container_width=True):
+        # Check if repository has been validated
+        repository_validated = st.session_state.get('repository_validated', False)
+        validated_repo_url = st.session_state.get('validated_repo_url', '')
+        
+        # Show validation status
+        if repository_validated and validated_repo_url == repo_url:
+            st.success("✅ Repository validated and ready for test generation")
+        elif repo_url and not repository_validated:
+            st.warning("⚠️ Please validate the repository before generating tests")
+        elif repo_url and repository_validated and validated_repo_url != repo_url:
+            st.warning("⚠️ Repository URL changed. Please re-validate the repository")
+            st.session_state.repository_validated = False
+        
+        # Generate tests button - only enabled if repository is validated
+        if st.button("🚀 Generate Tests", type="primary", use_container_width=True, 
+                    disabled=not (repository_validated and validated_repo_url == repo_url)):
             if not groq_api_key:
                 st.error("❌ GROQ API key is required for test generation")
                 return
             
             with st.spinner("🤖 AI is analyzing your codebase and generating tests..."):
-                result = generate_tests(
+                
+                result = asyncio.run(generate_tests(
                     repo_url, 
                     github_token, 
                     groq_api_key,
                     test_framework,
                     test_coverage,
-                    include_docs,
+                    test_folder,
                     max_tests_per_file,
                     include_edge_cases,
                     test_timeout,
                     parallel_tests
-                )
+                ))
                 
                 if result.get("success"):
                     display_results(result)
                 else:
                     st.error(f"❌ Error generating tests: {result.get('error', 'Unknown error')}")
     
-    # Recent activity
-    st.header("📊 Recent Activity")
-    display_recent_activity()
+    # # Recent activity
+    # st.header("📊 Recent Activity")
+    # display_recent_activity()
 
-def save_configuration(github_token, groq_api_key, google_api_key):
+def save_configuration(github_token, groq_api_key):
     """Save configuration to session state"""
     st.session_state.github_token = github_token
     st.session_state.groq_api_key = groq_api_key
-    st.session_state.google_api_key = google_api_key
     
     # Save to .env file
     env_content = f"""# Hiro Configuration
 GITHUB_PERSONAL_ACCESS_TOKEN={github_token}
 GROQ_API_KEY={groq_api_key}
-GOOGLE_API_KEY={google_api_key}
 """
     
     try:
@@ -270,57 +317,121 @@ def validate_repository(repo_url, github_token):
         }
         
         response = requests.get(url, headers=headers)
+        print(response.json())
         return response.status_code == 200
     
     except Exception:
         return False
 
-def generate_tests(repo_url, github_token, groq_api_key, test_framework, test_coverage, 
-                  include_docs, max_tests_per_file, include_edge_cases, test_timeout, parallel_tests):
+async def generate_tests(repo_url, github_token, groq_api_key, test_framework, test_coverage, 
+                  test_folder, max_tests_per_file, include_edge_cases, test_timeout, parallel_tests):
     """Generate tests using the Hiro backend"""
+    start_time = time.time()
     try:
-        # This would call your existing backend API
-        # For now, we'll simulate the process
+        # Initialize llm
+        st.info("🔄 Initializing AI model...")
+        llm = await model()
         
-        # Extract repository info
-        parts = repo_url.strip("/").split("/")
-        owner = parts[-2]
-        repo = parts[-1]
+        repo_name = repo_url.split('/')[-1]
+    
+        # Get and print the tree structure
+        st.info("📂 Fetching repository tree structure...")
+        tree_data = get_repo_tree(repo_url)
+        # print_tree_structure(tree_data)
         
-        # Simulate API call to your backend
-        payload = {
-            "repo_url": repo_url,
-            "github_token": github_token,
-            "groq_api_key": groq_api_key,
-            "test_framework": test_framework,
-            "test_coverage": test_coverage,
-            "include_docs": include_docs,
-            "max_tests_per_file": max_tests_per_file,
-            "include_edge_cases": include_edge_cases,
-            "test_timeout": test_timeout,
-            "parallel_tests": parallel_tests
-        }
+        folder = test_folder
         
-        # In a real implementation, you would call your backend API here
-        # response = requests.post("http://localhost:8000/generate-tests", json=payload)
+        # print("\nRepository Structure with Content:")
+        st.info("📄 Gathering repository file contents...")
+        full_context, all_files = [], []
+        full_context, all_files = print_repository_structure(repo_url, full_context, all_files, folder)
+        st.success(f"✅ All files acquired: {len(all_files)} files found.")
         
-        # For now, return a simulated response
+        # Join all content with newlines
+        full_context_str = "\n".join(full_context)
+        
+        # Progress tracking
+        total_files = len(all_files)
+        processed_files = 0
+        
+        for path in all_files:
+            user_prompt = "Generate a test function for this file"
+            
+            file_content = get_file_content(repo_url, f"{path}")
+            
+            file_ext = path.split(".")[-1]
+        
+            processed_files += 1
+            st.info(f"🤖 Generating tests for `{path}`... ({processed_files}/{total_files})")
+            generated_code = await generate_code(llm, str(tree_data), full_context_str, file_content, user_prompt)
+            
+            response = generated_code.tool_calls[0]["args"]
+            
+            #  print("Generated Code:", response['code'])
+            st.info(f"📝 Metadata for `{path}`: {response['metadata']}")
+            st.info(f"📦 Required Packages for `{path}`: {response['packages']}")
+            
+            test_files_folder = f'server/hiro-tests/{repo_name}'
+            
+            # Create test file with appropriate extension
+            test_file_name = f"test_{path.split('/')[-1].split('.')[0]}.test.{file_ext}"
+            test_file_path = os.path.join(test_files_folder, test_file_name)
+            
+            # Create tests directory if it doesn't exist
+            os.makedirs(test_files_folder, exist_ok=True)
+            
+            # Write generated test code to file
+            with open(test_file_path, 'w') as f:
+                f.write(response['code'])
+            st.success(f"✅ Test file created: `{test_file_path}`")
+                
+            # Write metadata to markdown file
+            metadata_file_path = os.path.join(test_files_folder, 'metadata.md')
+            mode = 'a' if os.path.exists(metadata_file_path) else 'w'
+            with open(metadata_file_path, mode) as f:
+                f.write(response['metadata'])
+                f.write("\n\n## Required Packages\n")
+                for package in response['packages']:
+                    f.write(f"- {package}\n")
+                st.info(f"🗒️ Metadata file updated: `{metadata_file_path}`")
+                
+        st.info("🌱 Creating 'hiro-tests' branch in the repository...")
+        create_branch(repo_url, "hiro-tests")
+        
+        # Loop through all files in the test folder and commit each one
+        for filename in os.listdir(test_files_folder):
+            file_path = os.path.join(test_files_folder, filename)
+            if os.path.isfile(file_path):
+                commit_test_changes(repo_url, f"generated test cases for {filename}", file_path)
+        
+        st.success("🚀 Done! Committed changes to GitHub.")
+        
+        # Calculate execution time
+        end_time = time.time()
+        execution_time_seconds = end_time - start_time
+        
+        # Format execution time
+        if execution_time_seconds < 60:
+            execution_time_str = f"{execution_time_seconds:.1f}s"
+        elif execution_time_seconds < 3600:
+            minutes = int(execution_time_seconds // 60)
+            seconds = int(execution_time_seconds % 60)
+            execution_time_str = f"{minutes}m {seconds}s"
+        else:
+            hours = int(execution_time_seconds // 3600)
+            minutes = int((execution_time_seconds % 3600) // 60)
+            execution_time_str = f"{hours}h {minutes}m"
+        
         return {
             "success": True,
-            "repository": f"{owner}/{repo}",
-            "files_processed": 5,
-            "tests_generated": 15,
-            "test_files": [
-                "test_main.py",
-                "test_utils.py", 
-                "test_api.py",
-                "test_database.py",
-                "test_auth.py"
-            ],
+            "repository": repo_name,
+            "files_processed": len(all_files),
+            "tests_generated": len(os.listdir(test_files_folder)),
+            "test_files": all_files,
             "coverage_percentage": 85,
-            "execution_time": "2m 30s",
-            "branch_created": "hiro-tests-2024-01-15",
-            "pull_request_url": f"https://github.com/{owner}/{repo}/pull/123"
+            "execution_time": execution_time_str,
+            "branch_created": "hiro-tests",
+            "pull_request_url": f"{repo_url}/tree/hiro-tests"
         }
         
     except Exception as e:
@@ -343,9 +454,6 @@ def display_results(result):
         st.metric("Tests Generated", result["tests_generated"])
     
     with col3:
-        st.metric("Coverage", f"{result['coverage_percentage']}%")
-    
-    with col4:
         st.metric("Execution Time", result["execution_time"])
     
     # Test files
@@ -356,75 +464,14 @@ def display_results(result):
     # Actions
     st.subheader("🚀 Next Steps")
     
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        if st.button("🔍 View Generated Tests", use_container_width=True):
-            st.info("This would open the GitHub repository with the generated tests")
-    
-    with col2:
-        if st.button("📊 View Coverage Report", use_container_width=True):
-            st.info("This would show a detailed coverage report")
-    
     # GitHub integration
     st.markdown(f"""
     <div class="success-message">
-        <h4>✅ GitHub Integration Complete</h4>
+        <h4>✅ Test cases pushed to your GitHub</h4>
         <p><strong>Branch created:</strong> <code>{result['branch_created']}</code></p>
         <p><strong>Pull Request:</strong> <a href="{result['pull_request_url']}" target="_blank">View Pull Request</a></p>
     </div>
     """, unsafe_allow_html=True)
-
-def display_recent_activity():
-    """Display recent test generation activity"""
-    # This would typically load from a database
-    # For now, we'll show sample data
-    
-    activities = [
-        {
-            "repository": "user/project-a",
-            "tests_generated": 12,
-            "coverage": 78,
-            "timestamp": "2024-01-15 14:30",
-            "status": "completed"
-        },
-        {
-            "repository": "user/project-b", 
-            "tests_generated": 8,
-            "coverage": 92,
-            "timestamp": "2024-01-15 12:15",
-            "status": "completed"
-        },
-        {
-            "repository": "user/project-c",
-            "tests_generated": 0,
-            "coverage": 0,
-            "timestamp": "2024-01-15 10:45",
-            "status": "failed"
-        }
-    ]
-    
-    for activity in activities:
-        with st.container():
-            col1, col2, col3, col4 = st.columns([2, 1, 1, 1])
-            
-            with col1:
-                st.write(f"**{activity['repository']}**")
-                st.caption(activity['timestamp'])
-            
-            with col2:
-                st.write(f"{activity['tests_generated']} tests")
-            
-            with col3:
-                st.write(f"{activity['coverage']}% coverage")
-            
-            with col4:
-                if activity['status'] == 'completed':
-                    st.success("✅")
-                else:
-                    st.error("❌")
-            
-            st.divider()
 
 if __name__ == "__main__":
     main() 

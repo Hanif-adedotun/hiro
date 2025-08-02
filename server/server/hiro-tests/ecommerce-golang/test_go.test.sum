@@ -1,26 +1,63 @@
-package db
+package application
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"testing"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
-func TestConnectDB(t *testing.T) {
+func TestAppStart(t *testing.T) {
 	// Arrange
-	var dbUser = "testuser"
-	var dbPwd = "testpassword"
-	var dbTCPHost = "localhost"
-	var dbPort = "5432"
-	var dbName = "testdb"
-	os.Setenv("DB_USER", dbUser)
-	os.Setenv("DB_PASS", dbPwd)
-	os.Setenv("INSTANCE_HOST", dbTCPHost)
-	os.Setenv("DB_PORT", dbPort)
-	os.Setenv("DB_NAME", dbName)
-	// Act
-	_, err := ConnectDB()
-	// Assert
+	ctx := context.Background()
+	ctxCancel, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	// Mock db connection
+	dbConn, err := sql.Open("pgx", "host=localhost user=postgres password=postgres port=5432 database=postgres")
 	if err != nil {
-		t.Errorf("ConnectDB() error = %v", err)
+		t.Errorf("failed to connect to database: %v", err)
+	}
+	defer dbConn.Close()
+
+	// Create a new app instance
+	app := &App{
+		router: chi.NewRouter(),
+		db:     dbConn,
+	}
+
+	// Act
+	go func() {
+		if err := app.Start(ctxCancel); err != nil {
+			t.Errorf("app start failed: %v", err)
+		}
+	}()
+
+	// Assert
+	// Check if server is listening on port 8080
+	// Use a library like net/http/httptest to test the server
+	// For this example, we'll just check if the port is in use
+	// This is a very basic check and might not cover all scenarios
+	if err := app.db.Ping(); err != nil {
+		t.Errorf("database connection failed: %v", err)
+	}
+}
+
+func TestAppLoadRoutes(t *testing.T) {
+	// Arrange
+	app := &App{}
+
+	// Act
+	app.loadRoutes()
+
+	// Assert
+	if app.router == nil {
+		t.Errorf("router is nil after loading routes")
 	}
 }

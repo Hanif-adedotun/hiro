@@ -16,26 +16,84 @@ import (
 
 func TestOrderCreate(t *testing.T) {
 	// Arrange
-	o := &Order{Repo: &db.PostgreRepo{}}
-	w := httptest.NewRecorder()
-	r := httptest.NewRequest("POST", "/", nil)
-	body := struct {
-		CustomerID uuid.UUID `json:"customer_id"`
-		LineItems []model.LineItem `json:"lineitems"`
-	}{}
-	body.CustomerID = uuid.New()
-	body.LineItems = []model.LineItem{{}}
-	jsonBody, _ := json.Marshal(body)
-	r.Body = nil
-	r.Header.Set("Content-Type", "application/json")
-	r.Header.Set("Content-Length", fmt.Sprintf("%d", len(jsonBody)))
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(jsonBody))
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		o := &Order{Repo: &db.PostgreRepo{}}
+		o.Create(w, r)
+	}))
+	defer s.Close()
+
+	body := `{"customer_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8", "lineitems": []}`
+	req, err := http.NewRequest("POST", s.URL, strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
 
 	// Act
-	o.Create(w, r)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
 
 	// Assert
-	if w.Code != http.StatusCreated {
-		t.Errorf("Expected status code %d but got %d", http.StatusCreated, w.Code)
+	if resp.StatusCode != http.StatusCreated {
+		t.Errorf("expected status code %d but got %d", http.StatusCreated, resp.StatusCode)
+	}
+}
+
+func TestOrderCreateError(t *testing.T) {
+	// Arrange
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		o := &Order{Repo: &db.PostgreRepo{}}
+		o.Create(w, r)
+	}))
+	defer s.Close()
+
+	body := `{"customer_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8"}`
+	req, err := http.NewRequest("POST", s.URL, strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Act
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	// Assert
+	if resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("expected status code %d but got %d", http.StatusBadRequest, resp.StatusCode)
+	}
+}
+
+func TestOrderCreateRepoError(t *testing.T) {
+	// Arrange
+	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		o := &Order{Repo: &db.PostgreRepo{}}
+		o.Create(w, r)
+	}))
+	defer s.Close()
+
+	body := `{"customer_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8", "lineitems": []}`
+	req, err := http.NewRequest("POST", s.URL, strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	// Act
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	// Assert
+	if resp.StatusCode != http.StatusInternalServerError {
+		t.Errorf("expected status code %d but got %d", http.StatusInternalServerError, resp.StatusCode)
 	}
 }

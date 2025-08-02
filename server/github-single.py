@@ -85,7 +85,9 @@ async def main():
      create_branch(repo_url, "hiro-tests")
      
      # Loop through all files in the test folder and commit each one
+     
      for filename in os.listdir(test_files_folder):
+         print(f"Looping through {filename} to commit")
          file_path = os.path.join(test_files_folder, filename)
          if os.path.isfile(file_path):
                  commit_test_changes(repo_url, f"generated test cases for {filename}", file_path)

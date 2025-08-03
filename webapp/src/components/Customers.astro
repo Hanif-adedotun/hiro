@@ -1,5 +1,5 @@
 ---
-import Stars from "../assets/stars.svg";
+import { ArrowRight } from "@lucide/astro";
 ---
 
 <section class="product-reviews" id="customers">
@@ -21,14 +21,20 @@ import Stars from "../assets/stars.svg";
         <small><strong>1 millon</strong> customers and counting</small>
       </div> -->
       <div class="center">
-        <a href="#" class="button button-primary">Try Beta</a>
-        <small class="block text-muted-foreground"
+        <a
+          href="/beta"
+          class="inline-flex items-center gap-2 px-6 py-4 font-semibold bg-gradient-to-br from-orange-500 via-yellow-400 to-orange-400 !text-black rounded-lg shadow hover:from-orange-600 hover:to-yellow-500 transition-all hover:scale-105 focus:outline-none"
+        >
+          Try Beta
+          <ArrowRight size={20} class="-mr-1 text-black" />
+        </a>
+        <small class="block text-muted-foreground mt-5"
           >Focus on building, while Hiro handles the testing for you.</small
         >
       </div>
     </div>
 
-    <div class="customer-avatars">
+    <div class="customer-avatars hidden md:block">
       <div class="left-side-avatars">
         {
           [

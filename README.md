@@ -30,7 +30,7 @@
 </p>
    
 <h4>
-    <a href="https://github.com/Louis3797/awesome-readme-template/">View Demo</a>
+    <a href="https://github.com/hanif-adedotun/hiro/">View Repository</a>
   <span> · </span>
     <a href="https://github.com/hanif-adedotun/hiro/issues/">Report Bug</a>
   <span> · </span>
@@ -70,24 +70,38 @@
 </div>
 
 <p>Hiro is an AI tool designed to automatically generate unit test cases and requirement documentation for your codebase, regardless of the programming language or framework you're using.</p>
+
+### :space_invader: Tech Stack
+
+- **Backend**: Python 3.x
+- **AI/ML**: LangChain, Groq (Llama 3.3 70B), Google Generative AI
+- **Web Framework**: Streamlit
+- **GitHub Integration**: PyGithub, GitHub API
+- **Environment Management**: python-dotenv
+- **Testing**: pytest, debugpy
+- **Dependencies**: See requirements.txt for complete list
 <!-- Features -->
 
 ### :dart: Features
 
 - **Language Agnostic**: Works with any programming language or testing framework
-- **Intelligent Test Generation**: Leverages AI to create comprehensive test cases
-- **GitHub Integration**: Seamlessly integrates with GitHub MCP (Multiple Code Paths)
-- **Automated GitHub Actions**: Creates and configures GitHub Actions for running the generated tests
-- **Continuous Testing**: Ensures your code is always tested with each change
-- **Automated Documentation**: Generates detailed requirement documentation from your codebase (coming soon...)
+- **AI-Powered Test Generation**: Uses Groq's Llama 3.3 70B model to generate comprehensive test cases
+- **GitHub Integration**: Direct integration with GitHub repositories via PyGithub
+- **Repository Analysis**: Automatically analyzes repository structure and file contents
+- **Automated Test File Creation**: Creates properly named test files in organized directories
+- **Metadata Generation**: Generates detailed metadata and package requirements for each test
+- **Streamlit Web Interface**: User-friendly web interface for easy interaction
+- **Branch Management**: Automatically creates and manages test branches on GitHub
+- **Multiple AI Models**: Supports Groq and Google Generative AI for flexible AI processing
 
 ### :dart: How it Works
 
-1. Hiro analyzes your codebase to understand its structure and functionality
-2. The AI generates appropriate test cases tailored to your specific code
-3. Requirement documentation is automatically created based on code analysis
-4. GitHub MCP is utilized to create multiple code paths for thorough testing
-5. GitHub Actions are automatically configured to run these tests on your repository
+1. **Repository Analysis**: Hiro connects to your GitHub repository and analyzes its file structure and contents
+2. **Code Context Extraction**: The system extracts relevant code files, skipping binary and configuration files
+3. **AI Processing**: The code is processed by Groq's Llama 3.3 70B model to understand functionality and generate appropriate test cases
+4. **Test Generation**: AI generates up to 3 comprehensive test cases per file, following testing best practices
+5. **Metadata Creation**: Each test includes metadata and required package information for easy setup
+6. **GitHub Integration**: Tests are automatically committed to a new branch called `hiro-tests`  on your repository
 
 <!-- Env Variables -->
 
@@ -95,9 +109,11 @@
 
 To run this project, you will need to add the following environment variables to your .env file
 
-`API_KEY`
+`GITHUB_PERSONAL_ACCESS_TOKEN` - Your GitHub personal access token for repository access
 
-`ANOTHER_API_KEY`
+`GROQ_API_KEY` - Your Groq API key for AI model access
+
+`GOOGLE_API_KEY` - Your Google API key for additional AI services
 
 <!-- Getting Started -->
 
@@ -107,65 +123,127 @@ To run this project, you will need to add the following environment variables to
 
 ### :bangbang: Prerequisites
 
-This project uses Yarn as package manager
+This project requires Python 3.x and pip
 
-```bash
- npm install --global yarn
-```
+- Python 3.7 or higher
+- pip (Python package installer)
+- Git (for GitHub integration)
 
 <!-- Installation -->
 
 ### :gear: Installation
 
-Install my-project with npm
+1. Clone the repository
 
 ```bash
-  yarn install my-project
-  cd my-project
+  git clone https://github.com/hanif-adedotun/hiro.git
+  cd hiro
+```
+
+2. Navigate to the server directory
+
+```bash
+  cd server
+```
+
+3. Create a virtual environment (recommended)
+
+```bash
+  python -m venv .venv
+  source .venv/bin/activate 
+```
+
+4. Install dependencies
+
+```bash
+  pip install -r requirements.txt
+```
+
+5. Create a `.env` file in the server directory and add your API keys
+
+```bash
+  touch .env 
 ```
 
 <!-- Run Locally -->
 
 ### :running: Run Locally
 
-Clone the project
+1. Make sure you're in the server directory and have activated your virtual environment
 
 ```bash
-  git clone https://github.com/Louis3797/awesome-readme-template.git
+  cd server
+  source .venv/bin/activate 
 ```
 
-Go to the project directory
+2. Ensure your `.env` file contains the required API keys
 
 ```bash
-  cd my-project
+  GITHUB_PERSONAL_ACCESS_TOKEN=your_github_token
+  GROQ_API_KEY=your_groq_api_key
+  GOOGLE_API_KEY=your_google_api_key
 ```
 
-Install dependencies
+3. Run the application
 
 ```bash
-  yarn install
+  python app.py
 ```
 
-Start the server
+4. For the Streamlit web interface, run:
 
 ```bash
-  yarn start
+  streamlit run streamlit_app.py
 ```
 
-## Benefits
+The application will start and you can begin generating test cases for your repositories.
 
-- **Save Time**: Eliminate the tedious process of writing unit tests and documentation manually
-- **Improve Coverage**: AI ensures comprehensive test coverage
-- **Reduce Bugs**: Catch issues early with thorough automated testing
-- **Streamline CI/CD**: Automated GitHub Actions integration simplifies your pipeline
-- **Better Documentation**: Keep your requirement documentation always in sync with your code
+## :eyes: Usage
+
+### Command Line Interface
+
+1. Run the main application:
+```bash
+python app.py
+```
+
+2. Follow the prompts to provide your GitHub repository URL
+
+3. The system will automatically:
+   - Analyze your repository structure
+   - Generate test cases for each relevant file
+   - Create organized test files in a `hiro-tests` directory
+   - Commit the tests to a new branch on your repository
+
+### Web Interface
+
+1. Start the Streamlit application:
+```bash
+streamlit run streamlit_app.py
+```
+
+2. Open your browser to the provided local URL (usually `http://localhost:8501`)
+
+3. Use the web interface to:
+   - Enter repository URLs
+   - Monitor test generation progress
+   - View generated test files and metadata
+   - Manage your test generation workflow
 
 <!-- Roadmap -->
 
 ## :compass: Roadmap
 
-- [x] Todo 1
-- [ ] Todo 2
+- [x] Basic GitHub repository integration
+- [x] AI-powered test generation with Groq
+- [x] Streamlit web interface
+- [x] Automated test file creation and organization
+- [x] GitHub branch management and commits
+- [ ] Enhanced test coverage analysis
+- [ ] Dashboard for test result reporting and analytics
+- [ ] Integration with more AI models
+- [ ] Automated documentation generation
+- [ ] CI/CD pipeline integration
 
 <!-- Contributing -->
 
@@ -189,6 +267,6 @@ Distributed under the no License. See LICENSE.txt for more information.
 
 ## :handshake: Contact
 
-Hanif - [@twitter_handle](https://twitter.com/devhanif) - hiro@hanif.one
+Hanif - [@devhanif](https://x.com/devhanif) - hiro@hanif.one
 
 Project Link: [https://github.com/hanif-adedotun/hiro](https://github.com/hanif-adedotun/hiro)

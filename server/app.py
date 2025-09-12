@@ -10,7 +10,7 @@ async def main():
      
     # Example usage
     # repo_url = "https://github.com/Hanif-adedotun/semra-website"
-    repo_url = "https://github.com/Hanif-adedotun/ecommerce-golang"
+    repo_url = ""
     repo_name = repo_url.split('/')[-1]
     
     # Get and print the tree structure
@@ -79,17 +79,6 @@ async def main():
      
     print(f"Done! Commited changes to github")
              
-    
-    # # Save the full context to a file
-    # if full_context:
-    #     output_dir = os.path.join(os.path.dirname(__file__), repo_name)
-    #     os.makedirs(output_dir, exist_ok=True)
-        
-    #     output_file = os.path.join(output_dir, f'{repo_name}.txt')
-    #     with open(output_file, 'w', encoding='utf-8') as f:
-    #         f.write(full_context_str)
-    #     print(f"Repository context saved to {output_file}")
-
 if __name__ == "__main__":
      import asyncio
      asyncio.run(main())

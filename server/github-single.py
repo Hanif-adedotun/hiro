@@ -1,10 +1,4 @@
-# {'owner': 'Hanif-adedotun', 'repo': 'semra-website'}\
-     
-# file path
-# src/app/_components/(landing)/(prayers)/prayers.tsx
-# src/app/contact/page.tsx
-# src/app/articles/page.tsx
-# src/app/articles/[id]/page.tsx
+
 from  githubapi import  get_repo_tree, create_branch, get_file_content, commit_test_changes
 from model import model, generate_code, ResponseFormatter
 import os
@@ -28,7 +22,7 @@ async def main():
      llm = await model()
       
     #  repo_url = "https://github.com/Hanif-adedotun/semra-website"
-     repo_url = "https://github.com/Hanif-adedotun/ecommerce-golang"
+     repo_url = ""
      repo_name = repo_url.split('/')[-1]
      
      # Get and print the tree structure
@@ -42,10 +36,9 @@ async def main():
          full_content = f.read()
      print("\nAcquired full context of repository tree structure:")
          
-     # Get file content to generate unit test
-    #  path = "src/app/_components/(landing)/(prayers)/prayers.tsx"
-    #  path = "src/app/_components/(landing)/donation.tsx"
-     path = "handler/order.go"
+    #  If you want to specify a specific file path
+    # Leave it at path = "", of you want to generate tests for all files in the repository
+     path = ""
      file_ext = path.split(".")[-1]
      file_content = get_file_content(repo_url, f"{path}")
      

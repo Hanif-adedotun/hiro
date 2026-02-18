@@ -1,0 +1,189 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  githubId      String    @unique
+  username      String
+  email         String?
+  avatarUrl     String?
+  accessToken   String?   // Encrypted GitHub access token
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  repositories Repository[]
+  installations Installation[]
+  
+  @@index([githubId])
+}
+
+model Installation {
+  id                String   @id @default(cuid())
+  installationId    Int      @unique // GitHub installation ID
+  accountId         String
+  accountType       String   // User or Organization
+  accountLogin      String
+  userId            String?
+  user              User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  suspendedAt       DateTime?
+  suspendedBy       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  repositories      Repository[]
+  
+  @@index([installationId])
+  @@index([userId])
+}
+
+model Repository {
+  id                String   @id @default(cuid())
+  githubId           Int      @unique // GitHub repository ID
+  name              String
+  fullName          String   // owner/repo
+  owner             String
+  private           Boolean  @default(false)
+  defaultBranch     String
+  language          String?
+  installationId    Int?
+  installation      Installation? @relation(fields: [installationId], references: [id], onDelete: Cascade)
+  userId            String?
+  user              User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled           Boolean  @default(true)
+  autoGenerateTests Boolean @default(false)
+  maxPRsPerDay      Int      @default(10)
+  protectedDirs     String[] @default([]) // Directories to skip
+  onlyChangedFiles  Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  pullRequests      PullRequest[]
+  testJobs          TestJob[]
+  testResults       TestResult[]
+  coverageSnapshots CoverageSnapshot[]
+  actionsFeed       ActionFeed[]
+  
+  @@index([githubId])
+  @@index([userId])
+  @@index([installationId])
+  @@index([fullName])
+}
+
+model PullRequest {
+  id                String   @id @default(cuid())
+  prNumber          Int
+  repositoryId      String
+  repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  title             String
+  state             String   // open, closed, merged
+  headSha           String
+  baseSha           String
+  author            String
+  changedFiles      String[] // Array of file paths
+  additions         Int
+  deletions         Int
+  analysisStatus    String   @default("pending") // pending, analyzing, completed, failed
+  hasTests          Boolean  @default(false)
+  testCoverage      Float?   // Coverage percentage
+  riskLevel         String?  // low, medium, high
+  suggestions       Json?    // AI-generated suggestions
+  hiroCommentId     Int?     // GitHub comment ID if commented
+  hiroPRId          Int?     // GitHub PR ID if auto-created PR
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  analyzedAt        DateTime?
+  
+  testJobs          TestJob[]
+  
+  @@unique([repositoryId, prNumber])
+  @@index([repositoryId])
+  @@index([state])
+  @@index([analysisStatus])
+}
+
+model TestJob {
+  id                String   @id @default(cuid())
+  repositoryId      String
+  repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  pullRequestId     String?
+  pullRequest       PullRequest? @relation(fields: [pullRequestId], references: [id], onDelete: SetNull)
+  jobType           String   // "full_repo" | "pr_analysis" | "file_specific"
+  status            String   @default("pending") // pending, processing, completed, failed
+  targetFiles       String[] // Files to generate tests for
+  progress          Int      @default(0) // 0-100
+  errorMessage      String?
+  metadata          Json?    // Additional job metadata
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  startedAt         DateTime?
+  completedAt       DateTime?
+  
+  testResults       TestResult[]
+  
+  @@index([repositoryId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model TestResult {
+  id                String   @id @default(cuid())
+  jobId             String
+  job               TestJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  repositoryId      String
+  repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  filePath          String
+  testFilePath      String
+  testCode          String
+  metadata          String   // Markdown metadata
+  requiredPackages  String[]
+  testFramework     String?
+  coverage          Float?
+  createdAt         DateTime @default(now())
+  
+  @@index([jobId])
+  @@index([repositoryId])
+  @@index([filePath])
+}
+
+model CoverageSnapshot {
+  id                String   @id @default(cuid())
+  repositoryId      String
+  repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  overallCoverage   Float
+  fileCoverage      Json     // Map of file paths to coverage percentages
+  totalFiles        Int
+  testedFiles       Int
+  createdAt         DateTime @default(now())
+  
+  @@index([repositoryId])
+  @@index([createdAt])
+}
+
+model ActionFeed {
+  id                String   @id @default(cuid())
+  repositoryId      String
+  repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  actionType        String   // "pr_suggestion" | "pr_opened" | "pr_merged" | "pr_rejected" | "skipped"
+  title             String
+  description       String?
+  prNumber          Int?
+  prUrl             String?
+  riskLevel         String?  // low, medium, high
+  coverageImpact    Float?   // Estimated coverage improvement
+  metadata          Json?    // Additional action metadata
+  createdAt         DateTime @default(now())
+  
+  @@index([repositoryId])
+  @@index([createdAt])
+  @@index([actionType])
+}
+

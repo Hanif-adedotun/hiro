@@ -96,12 +96,23 @@ export default function SettingsPanel({ repositories }: SettingsPanelProps) {
 
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">GitHub App Configuration</h2>
-        <p className="text-sm text-gray-600">
-          Configure your GitHub App settings. Make sure your webhook URL is set to:
+        <p className="text-sm text-gray-600 mb-3">
+          Configure your GitHub App settings. Use these URLs:
         </p>
-        <code className="block mt-2 p-2 bg-gray-100 rounded text-sm">
-          {typeof window !== 'undefined' ? window.location.origin : ''}/api/webhooks/github
-        </code>
+        <div className="space-y-2">
+          <div>
+            <span className="text-xs font-medium text-gray-500">Webhook URL</span>
+            <code className="block mt-1 p-2 bg-gray-100 rounded text-sm">
+              {typeof window !== 'undefined' ? window.location.origin : 'https://hiro.hanif.one'}/api/webhooks/github
+            </code>
+          </div>
+          <div>
+            <span className="text-xs font-medium text-gray-500">OAuth callback URL</span>
+            <code className="block mt-1 p-2 bg-gray-100 rounded text-sm">
+              {typeof window !== 'undefined' ? window.location.origin : 'https://hiro.hanif.one'}/github/callback
+            </code>
+          </div>
+        </div>
       </div>
     </div>
   )

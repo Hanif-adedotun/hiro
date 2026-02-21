@@ -1,3 +1,4 @@
 webapp/node_modules
 server/.env
 server/.venv
+*.pem

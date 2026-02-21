@@ -144,9 +144,13 @@ The application will be available at `http://localhost:3000`.
 1. **Create a GitHub App**
    - Go to your GitHub organization settings
    - Create a new GitHub App
-   - Set webhook URL to: `https://your-domain.com/api/webhooks/github`
+   - **Webhook URL**: `https://hiro.hanif.one/api/webhooks/github`
    - Grant permissions: Repository contents (read), Pull requests (read/write), Issues (write)
    - Subscribe to events: `pull_request`, `push`, `installation`
+
+**GitHub OAuth App (login)**  
+- **Authorization callback URL**: `https://hiro.hanif.one/github/callback`  
+- Set `NEXTAUTH_URL=https://hiro.hanif.one` in production.
 
 2. **Install the GitHub App**
    - Install it on your repositories

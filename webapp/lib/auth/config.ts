@@ -6,12 +6,13 @@ import { prisma } from "@/lib/db/client"
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    GitHubProvider({
+  GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
       authorization: {
         params: {
           scope: "read:user user:email repo",
+          redirect_uri: `${process.env.NEXTAUTH_URL}/github/callback`,
         },
       },
     }),

@@ -45,6 +45,14 @@ export async function getRepositoriesByUserId(userId: string) {
   })
 }
 
+/** All repos linked to the user (for Settings); includes disabled. */
+export async function getAllRepositoriesByUserId(userId: string) {
+  return prisma.repository.findMany({
+    where: { userId },
+    orderBy: { updatedAt: 'desc' },
+  })
+}
+
 export async function createRepository(data: {
   githubId: number
   name: string
@@ -167,6 +175,8 @@ export async function updateTestJob(
     metadata?: any
     startedAt?: Date
     completedAt?: Date
+    suggestedPrId?: string | null
+    suggestedPrUrl?: string | null
   }
 ) {
   return prisma.testJob.update({

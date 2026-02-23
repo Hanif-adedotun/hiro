@@ -14,23 +14,23 @@ interface RepoCardProps {
 export default function RepoCard({ repository }: RepoCardProps) {
   return (
     <Link href={`/repos/${repository.id}`}>
-      <div className="bg-white rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+      <div className="rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md hover:border-border/80">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{repository.name}</h3>
-            <p className="text-sm text-gray-500 mt-1">{repository.fullName}</p>
+            <h3 className="text-lg font-semibold text-foreground">{repository.name}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{repository.fullName}</p>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             {repository.language && (
-              <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+              <span className="rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                 {repository.language}
               </span>
             )}
             <span
-              className={`px-2 py-1 text-xs font-medium rounded ${
+              className={`rounded-md px-2 py-1 text-xs font-medium ${
                 repository.enabled
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-gray-100 text-gray-800'
+                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                  : 'bg-muted text-muted-foreground'
               }`}
             >
               {repository.enabled ? 'Active' : 'Inactive'}
@@ -38,8 +38,8 @@ export default function RepoCard({ repository }: RepoCardProps) {
           </div>
         </div>
         {repository.autoGenerateTests && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <span className="text-xs text-gray-500">Auto-generate tests enabled</span>
+          <div className="mt-4 border-t border-border pt-4">
+            <span className="text-xs text-muted-foreground">Auto-generate tests enabled</span>
           </div>
         )}
       </div>

@@ -119,8 +119,9 @@ async function handlePullRequestEvent(payload: any) {
 
   // Filter out protected directories
   if (repo.protectedDirs.length > 0) {
+    const protectedDirsList = repo.protectedDirs as string[]
     targetFiles = targetFiles.filter(file => {
-      return !repo.protectedDirs.some(dir => file.startsWith(dir))
+      return !protectedDirsList.some((dir: string) => file.startsWith(dir))
     })
   }
 
@@ -251,9 +252,68 @@ Would you like Hiro to generate tests for these files? Reply with \`@hiro genera
 }
 
 async function handlePushEvent(payload: any) {
-  // Handle push events if needed
-  // For now, we'll focus on PR events
-  console.log('Push event received:', payload.repository.full_name)
+  const { ref, repository, commits } = payload
+
+  if (!ref || !ref.startsWith('refs/heads/')) {
+    return
+  }
+
+  const branch = ref.replace(/^refs\/heads\//, '')
+
+  const repo = await prisma.repository.findFirst({
+    where: { fullName: repository.full_name },
+    include: { installation: true },
+  })
+
+  if (!repo || !repo.enabled || !repo.autoGenerateTests) {
+    return
+  }
+
+  const watchedBranches = repo.watchedBranches?.length
+    ? repo.watchedBranches
+    : [repo.defaultBranch]
+  if (!watchedBranches.includes(branch)) {
+    return
+  }
+
+  const changedPaths = new Set<string>()
+  for (const commit of commits || []) {
+    for (const path of commit.added || []) changedPaths.add(path)
+    for (const path of commit.modified || []) changedPaths.add(path)
+  }
+
+  let targetFiles = Array.from(changedPaths)
+  if (repo.onlyChangedFiles) {
+    targetFiles = targetFiles.filter(Boolean)
+  }
+  if (repo.protectedDirs?.length > 0) {
+    const protectedDirs = repo.protectedDirs as string[]
+    targetFiles = targetFiles.filter(
+      (file) => !protectedDirs.some((dir) => file.startsWith(dir))
+    )
+  }
+
+  if (targetFiles.length === 0) {
+    return
+  }
+
+  const job = await createTestJob({
+    repositoryId: repo.id,
+    jobType: 'push_analysis',
+    targetFiles,
+    metadata: { branch, ref, pushRepo: repository.full_name },
+  })
+
+  const processor = getJobProcessor()
+  processor.processJob(job.id).catch(console.error)
+
+  await createActionFeed({
+    repositoryId: repo.id,
+    actionType: 'push_suggestion',
+    title: `Suggested tests for push to ${branch}`,
+    description: `Generating tests for ${targetFiles.length} file(s)`,
+    metadata: { jobId: job.id, branch },
+  })
 }
 
 async function handleInstallationEvent(payload: any) {

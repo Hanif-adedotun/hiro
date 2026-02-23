@@ -1,106 +1,111 @@
 ---
-
+const plans = [
+  {
+    name: "Starter",
+    description: "For side projects and small teams",
+    price: "$0",
+    period: "forever",
+    cta: "Get started free",
+    href: "https://hiro.hanif.one/login",
+    highlight: false,
+    features: [
+      "Unlimited test generation",
+      "1 connected repository",
+      "GitHub integration",
+      "Community support",
+    ],
+  },
+  {
+    name: "Pro",
+    description: "For growing teams that ship often",
+    price: "$29",
+    period: "/ month",
+    cta: "Start free trial",
+    href: "https://hiro.hanif.one/login",
+    highlight: true,
+    features: [
+      "Everything in Starter",
+      "Unlimited repositories",
+      "Priority test generation",
+      "Requirement documentation",
+      "Email support",
+    ],
+  },
+  {
+    name: "Team",
+    description: "For organizations and enterprises",
+    price: "Custom",
+    period: "",
+    cta: "Contact sales",
+    href: "mailto:hello@hiro.hanif.one",
+    highlight: false,
+    features: [
+      "Everything in Pro",
+      "SSO & audit logs",
+      "Dedicated success manager",
+      "SLA & custom integrations",
+    ],
+  },
+];
 ---
 
-
-<section class="pricing-table" id="pricing">
-    <div class="container">
-        <div class="center text-container">
-            <h3 class="h1-title">Choose the right plan</h3>
-            <p>We have designed our pricing to help you find the best solutions for you and your incredible business</p>
-        </div>
-
-        <div class="row">
-            <div class="one-third column price-item">
-                <div class="price-header m-margin">
-                    <h5 class="l-subtitle">Starter</h5>
-                    <h3 class="h2-title">$9.99<span class="s-paragraph"> / month</span></h3>
-                    <a href="#" class="button u-full-width">start trial</a>
-                </div>
-
-                <div class="price-list">
-                    <p>Unlimited Feedback boards</p>
-                    <p>Unlimited Prioritization Table</p>
-                    <p>Single Sign-On (SSO)</p>
-                    <p>Brand Customization</p>
-                    <p>Unlimited Tracked Users</p>
-                    <p>Custom Domain</p>
-                    <p>Unlimited Prioritization Table</p>
-                </div>
-            </div>
-            <div class="one-third column price-item">
-                <div class="price-header m-margin">
-                    <h5 class="l-subtitle">Starter</h5>
-                    <h3 class="h2-title">$9.99<span class="s-paragraph"> / month</span></h3>
-                    <a href="#" class="button button-primary u-full-width">start trial</a>
-                </div>
-
-                <div class="price-list">
-                    <p>Unlimited Feedback boards</p>
-                    <p>Unlimited Prioritization Table</p>
-                    <p>Single Sign-On (SSO)</p>
-                    <p>Brand Customization</p>
-                    <p>Unlimited Tracked Users</p>
-                    <p>Custom Domain</p>
-                    <p>Unlimited Prioritization Table</p>
-                </div>
-            </div>
-            <div class="one-third column price-item">
-                <div class="price-header m-margin">
-                    <h5 class="l-subtitle">Starter</h5>
-                    <h3 class="h2-title">$9.99<span class="s-paragraph"> / month</span></h3>
-                    <a href="#" class="button u-full-width">start trial</a>
-                </div>
-
-                <div class="price-list">
-                    <p>Unlimited Feedback boards</p>
-                    <p>Unlimited Prioritization Table</p>
-                    <p>Single Sign-On (SSO)</p>
-                    <p>Brand Customization</p>
-                    <p>Unlimited Tracked Users</p>
-                    <p>Custom Domain</p>
-                    <p>Unlimited Prioritization Table</p>
-                </div>
-            </div>
-        </div>
+<section id="pricing" class="relative z-10 py-20 md:py-28" aria-labelledby="pricing-heading">
+  <div class="container mx-auto px-4">
+    <div class="mx-auto max-w-3xl text-center opacity-0 animate-fade-in-up" style="animation-delay: 0ms;">
+      <p class="text-sm font-medium text-chart-1">Pricing</p>
+      <h2 id="pricing-heading" class="mt-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+        Simple, transparent pricing
+      </h2>
+      <p class="mt-4 text-lg text-muted-foreground">
+        Start free. Upgrade when you need more repos or support.
+      </p>
     </div>
- </section>
 
-
- <style lang="scss">
-
-.pricing-table{
-   background-color: #fff;
-  .price-item{
-    border: 1px solid #dde2e5;
-    padding: 30px;
-    margin-top: 20px;
-    border-radius: 20px;
-    .price-header{
-      h3 .s-paragraph{
-        color: #9ba5b9;
+    <div class="mx-auto mt-16 grid max-w-5xl gap-8 md:grid-cols-3">
+      {
+        plans.map((plan, i) => (
+          <article
+            class={`relative flex flex-col rounded-2xl border bg-card p-8 shadow-sm opacity-0 animate-fade-in-up ${
+              plan.highlight
+                ? "border-chart-1 ring-2 ring-chart-1/20 dark:ring-chart-1/30"
+                : "border-border"
+            }`}
+            style={`animation-delay: ${100 + i * 80}ms;`}
+          >
+            {plan.highlight && (
+              <p class="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-chart-1 px-3 py-1 text-xs font-semibold text-white">
+                Most popular
+              </p>
+            )}
+            <h3 class="text-xl font-bold text-foreground">{plan.name}</h3>
+            <p class="mt-1 text-sm text-muted-foreground">{plan.description}</p>
+            <div class="mt-6 flex items-baseline gap-1">
+              <span class="text-4xl font-bold tracking-tight text-foreground">{plan.price}</span>
+              {plan.period && <span class="text-muted-foreground">{plan.period}</span>}
+            </div>
+            <a
+              href={plan.href}
+              class={`mt-6 flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
+                plan.highlight
+                  ? "bg-chart-1 text-white hover:opacity-90"
+                  : "border border-border bg-card text-foreground hover:bg-accent"
+              }`}
+            >
+              {plan.cta}
+            </a>
+            <ul class="mt-8 flex-1 space-y-3 text-sm text-muted-foreground">
+              {plan.features.map((feature) => (
+                <li class="flex items-center gap-2">
+                  <svg class="h-5 w-5 shrink-0 text-chart-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))
       }
-    }
-    .price-list{
-      p{
-        margin: 10px 0;
-        position: relative;
-        padding-left: 20px;
-        &::before{
-          position: absolute;
-          content: '';
-          left: 0; top: 5px;
-          display: inline-block;
-          transform: rotate(45deg);
-          height: 8px;
-          width: 5px;
-          border-bottom: 2px solid #9ba5b9;
-          border-right: 2px solid #9ba5b9;
-          z-index: 5;
-        }
-      }
-    }
-    
-  }
-}
- </style>
+    </div>
+  </div>
+</section>

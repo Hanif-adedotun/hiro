@@ -50,6 +50,17 @@ export class GitHubClient {
     return data
   }
 
+  /** List repositories the authenticated user has access to (token auth only). */
+  async listRepositoriesForAuthenticatedUser(options?: { perPage?: number; page?: number }) {
+    await delay(API_DELAY)
+    const { data } = await this.octokit.repos.listForAuthenticatedUser({
+      per_page: options?.perPage ?? 100,
+      page: options?.page ?? 1,
+      sort: 'updated',
+    })
+    return data
+  }
+
   async getRepositoryFiles(owner: string, repo: string, path: string = '', ref?: string): Promise<FileContent[]> {
     await delay(API_DELAY)
     try {
@@ -121,6 +132,29 @@ export class GitHubClient {
       }
       throw error
     }
+  }
+
+  /**
+   * Returns list of code file paths under a folder (recursive). Uses shouldSkipFile.
+   * Use for "folder selection" -> targetFiles in manual test run.
+   */
+  async getFilePathsUnderFolder(
+    owner: string,
+    repo: string,
+    folderPath: string = '',
+    ref?: string
+  ): Promise<string[]> {
+    const items = await this.getRepositoryFiles(owner, repo, folderPath, ref)
+    const paths: string[] = []
+    for (const item of items) {
+      if (item.type === 'file') {
+        if (!shouldSkipFile(item.name)) paths.push(item.path)
+      } else if (item.type === 'dir') {
+        const sub = await this.getFilePathsUnderFolder(owner, repo, item.path, ref)
+        paths.push(...sub)
+      }
+    }
+    return paths
   }
 
   async getRepositoryStructure(

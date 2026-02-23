@@ -1,5 +1,5 @@
 import { getSession } from '@/lib/auth/session'
-import { getRepositoriesByUserId } from '@/lib/db/queries'
+import { getAllRepositoriesByUserId } from '@/lib/db/queries'
 import SettingsPanel from '@/components/dashboard/settings-panel'
 
 export default async function SettingsPage() {
@@ -9,7 +9,7 @@ export default async function SettingsPage() {
     return null
   }
 
-  const repos = await getRepositoriesByUserId(session.user.id)
+  const repos = await getAllRepositoriesByUserId(session.user.id)
 
   return (
     <div className="space-y-8">

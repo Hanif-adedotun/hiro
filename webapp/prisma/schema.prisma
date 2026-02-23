@@ -12,18 +12,59 @@ datasource db {
 
 model User {
   id            String    @id @default(cuid())
-  githubId      String    @unique
-  username      String
-  email         String?
+  githubId      String?   @unique  // Set in signIn; optional so adapter can create user first
+  username      String?
+  email         String?   @unique  // Required by NextAuth adapter getUserByEmail (findUnique)
+  emailVerified DateTime?
+  name          String?   // NextAuth default; we also sync username from GitHub
+  image         String?   // NextAuth default; we also sync avatarUrl from GitHub
   avatarUrl     String?
   accessToken   String?   // Encrypted GitHub access token
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  
+
+  accounts      Account[]
+  sessions      Session[]
+
   repositories Repository[]
   installations Installation[]
-  
+
   @@index([githubId])
+}
+
+// NextAuth Prisma adapter (required for database sessions + OAuth account linking)
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@id([identifier, token])
 }
 
 model Installation {
@@ -55,11 +96,12 @@ model Repository {
   defaultBranch     String
   language          String?
   installationId    Int?
-  installation      Installation? @relation(fields: [installationId], references: [id], onDelete: Cascade)
+  installation      Installation? @relation(fields: [installationId], references: [installationId], onDelete: Cascade)
   userId            String?
   user              User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   enabled           Boolean  @default(true)
   autoGenerateTests Boolean @default(false)
+  watchedBranches   String[] @default([]) // Branches to trigger auto test generation on push (e.g. ["main"])
   maxPRsPerDay      Int      @default(10)
   protectedDirs     String[] @default([]) // Directories to skip
   onlyChangedFiles  Boolean  @default(true)
@@ -116,12 +158,14 @@ model TestJob {
   repository        Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
   pullRequestId     String?
   pullRequest       PullRequest? @relation(fields: [pullRequestId], references: [id], onDelete: SetNull)
-  jobType           String   // "full_repo" | "pr_analysis" | "file_specific"
-  status            String   @default("pending") // pending, processing, completed, failed
+  jobType           String   // "full_repo" | "pr_analysis" | "push_analysis" | "file_specific"
+  status            String   @default("pending") // pending, processing, completed, failed, pr_created
   targetFiles       String[] // Files to generate tests for
   progress          Int      @default(0) // 0-100
   errorMessage      String?
-  metadata          Json?    // Additional job metadata
+  metadata          Json?    // Additional job metadata (e.g. branch, push ref)
+  suggestedPrId     String?  // GitHub PR number (as string) or null until user accepts
+  suggestedPrUrl    String?  // URL of created PR after accept
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   startedAt         DateTime?

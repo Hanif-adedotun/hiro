@@ -3,74 +3,52 @@ import { featureList } from "./data/features";
 import { Badge } from "./ui/badge";
 ---
 
-<section class="" id="features">
-  <div class="container">
-    {
-      featureList.map((feature, i) => (
-        <div
-          class={`flex flex-col md:flex-row items-center mb-84 opacity-0 translate-y-8 animate-fade-in-up`}
-          style={{
-            animationDelay: `${i * 120 + 100}ms`,
-            animationFillMode: "forwards",
-          }}
-        >
-          {i % 2 === 1 ? (
-            <>
-              <div class="w-full md:w-2/5 text-white mb-6 md:mb-0">
-                <h3 class="text-3xl font-bold mb-4">
-                  {feature.title}{" "}
-                  {feature.coming_soon && (
-                    <Badge variant={"outline"} className="text-base mb-4">
-                      Coming Soon
-                    </Badge>
-                  )}
-                </h3>
-                <p class="text-lg leading-relaxed">{feature.description}</p>
+<section id="features" class="relative z-10 py-20 md:py-28" aria-labelledby="features-heading">
+  <div class="container mx-auto px-4">
+    <h2 id="features-heading" class="sr-only">Features</h2>
+    <div class="mx-auto max-w-3xl text-center opacity-0 animate-fade-in-up" style="animation-delay: 0ms;">
+      <p class="text-sm font-medium text-chart-1">Why Hiro</p>
+      <h3 class="mt-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+        Built for modern teams
+      </h3>
+      <p class="mt-4 text-lg text-muted-foreground">
+        From GitHub integration to requirement docs—everything you need to ship with confidence.
+      </p>
+    </div>
+
+    <div class="mt-16 space-y-24 md:space-y-32">
+      {
+        featureList.map((feature, i) => (
+          <article
+            class={`flex flex-col gap-10 md:gap-16 md:flex-row md:items-center ${i % 2 === 1 ? "md:flex-row-reverse" : ""} opacity-0 animate-fade-in-up`}
+            style={`animation-delay: ${120 + i * 100}ms;`}
+          >
+            <div class="flex-1 md:pr-8 md:last:pr-0 md:last:pl-8">
+              <div class="rounded-2xl border border-border bg-card p-1 shadow-sm overflow-hidden">
+                <img
+                  src={feature.image}
+                  alt=""
+                  class="w-full rounded-xl object-cover"
+                  width="640"
+                  height="360"
+                  loading="lazy"
+                />
               </div>
-              <div class="w-full md:w-3/5 md:pr-8">
-                <div class="border-dotted border-4 border-orange-400 rounded-2xl overflow-hidden bg-[#0a0a0a]">
-                  <img src={feature.image} class="object-contain w-full" />
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div class="w-full md:w-3/5 md:pr-8 mb-6 md:mb-0">
-                <div class="border-dotted border-4 border-orange-400 rounded-2xl overflow-hidden bg-[#0a0a0a]">
-                  <img src={feature.image} class="object-contain w-full" />
-                </div>
-              </div>
-              <div class="w-full md:w-2/5 text-white">
-                <h3 class="text-3xl font-bold mb-4">
-                  {feature.title}
-                  {feature.coming_soon && (
-                    <Badge variant={"outline"} className="text-base mb-4">
-                      Coming Soon
-                    </Badge>
-                  )}
-                </h3>
-                <p class="text-lg leading-relaxed">{feature.description}</p>
-              </div>
-            </>
-          )}
-        </div>
-      ))
-    }
+            </div>
+            <div class="flex-1">
+              <h4 class="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+                {feature.title}
+                {feature.coming_soon && (
+                  <Badge variant="outline" className="ml-2 align-middle text-xs">Coming soon</Badge>
+                )}
+              </h4>
+              <p class="mt-4 text-lg leading-relaxed text-muted-foreground">
+                {feature.description}
+              </p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
   </div>
 </section>
-
-<style>
-  @keyframes fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(32px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .animate-fade-in-up {
-    animation: fade-in-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-</style>

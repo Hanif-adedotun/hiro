@@ -1,80 +1,25 @@
 ---
-// import LinkedIn from "../assets/linkedin.svg";
 import X from "../assets/x.svg";
 import Github from "../assets/github.svg";
 ---
 
-<footer>
-  <div class="container row">
-    <div class="footer-link flex js one-half column">
-      <a href="#">About</a>
-      <a href="https://github.com/Hanif-adedotun/hiro/CONTRIBUTING.md"
-        >Contribute</a
-      >
-    </div>
-    <div class="footer-note one-half column">
-      <div class="u-pull-right">
-        <div class="flex">
-          <p>© Hanif 2025</p>
-          <a href="https://x.com/@devhanif"
-            ><img src={X.src} alt="Twitter icon" /></a
-          >
-          <a href="https://github.com/Hanif-adedotun/hiro"
-            ><img src={Github.src} alt="Github icon" /></a
-          >
-        </div>
+<footer class="relative z-10 border-t border-border bg-card/50 py-12">
+  <div class="container mx-auto px-4">
+    <div class="flex flex-col items-center justify-between gap-6 md:flex-row">
+      <div class="flex flex-wrap items-center justify-center gap-6 md:justify-start">
+        <a href="/#features" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Features</a>
+        <a href="/#pricing" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Pricing</a>
+        <a href="https://github.com/Hanif-adedotun/hiro/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Contribute</a>
+      </div>
+      <div class="flex items-center gap-6">
+        <p class="text-sm text-muted-foreground">© {new Date().getFullYear()} Hiro</p>
+        <a href="https://x.com/devhanif" target="_blank" rel="noopener noreferrer" class="text-muted-foreground transition-colors hover:text-foreground" aria-label="X (Twitter)">
+          <img src={X.src} alt="" class="h-5 w-5" width="20" height="20" />
+        </a>
+        <a href="https://github.com/Hanif-adedotun/hiro" target="_blank" rel="noopener noreferrer" class="text-muted-foreground transition-colors hover:text-foreground" aria-label="GitHub">
+          <img src={Github.src} alt="" class="h-5 w-5" width="20" height="20" />
+        </a>
       </div>
     </div>
   </div>
 </footer>
-
-<style lang="scss">
-  .flex {
-    display: flex;
-  }
-  footer {
-    padding: 40px 0;
-    background-color: transparent;
-
-    a,
-    p {
-      color: white;
-      font-size: 1.8rem;
-    }
-    .footer-link a {
-      padding-right: 20px;
-      text-decoration: none;
-    }
-    .container {
-      padding: 30px;
-      border-radius: 50px;
-
-      .footer-note {
-        a {
-          padding-left: 20px;
-          img {
-            width: 28px;
-            @media (max-width: 700px) {
-              width: 20px;
-            }
-          }
-        }
-      }
-    }
-    @media (max-width: 700px) {
-      p,
-      a {
-        font-size: 1.5rem;
-      }
-      .flex {
-        justify-content: center;
-      }
-      .column {
-        padding: 10px 0;
-      }
-      .u-pull-right {
-        float: none;
-      }
-    }
-  }
-</style>

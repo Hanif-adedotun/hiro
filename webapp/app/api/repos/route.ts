@@ -30,16 +30,41 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { githubUrl, installationId } = body
+    const { githubUrl, fullName, installationId } = body
 
-    if (!githubUrl) {
+    let owner: string
+    let repoName: string
+
+    if (fullName && typeof fullName === 'string') {
+      const parts = fullName.trim().split('/')
+      if (parts.length !== 2) {
+        return NextResponse.json(
+          { error: 'fullName must be "owner/repo"' },
+          { status: 400 }
+        )
+      }
+      ;[owner, repoName] = parts
+    } else if (githubUrl) {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+      })
+      if (!user?.accessToken) {
+        return NextResponse.json(
+          { error: 'GitHub access token not found' },
+          { status: 401 }
+        )
+      }
+      const github = createUserClient(user.accessToken)
+      const repoInfo = await github.getRepoInfo(githubUrl)
+      owner = repoInfo.owner
+      repoName = repoInfo.repo
+    } else {
       return NextResponse.json(
-        { error: 'GitHub URL is required' },
+        { error: 'Provide either githubUrl or fullName (e.g. "owner/repo")' },
         { status: 400 }
       )
     }
 
-    // Get user's GitHub token
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
     })
@@ -51,12 +76,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create GitHub client
     const github = createUserClient(user.accessToken)
-
-    // Parse repo URL
-    const repoInfo = await github.getRepoInfo(githubUrl)
-    const repoData = await github.getRepository(repoInfo.owner, repoInfo.repo)
+    const repoData = await github.getRepository(owner, repoName)
 
     // Check if repository already exists
     const existing = await prisma.repository.findFirst({

@@ -149,8 +149,8 @@ The application will be available at `http://localhost:3000`.
    - Subscribe to events: `pull_request`, `push`, `installation`
 
 **GitHub OAuth App (login)**  
-- **Authorization callback URL**: `https://hiro.hanif.one/github/callback`  
-- Set `NEXTAUTH_URL=https://hiro.hanif.one` in production.
+- **Authorization callback URL**: `https://hiro.hanif.one/api/auth/callback/github` (production) or `http://localhost:4321/api/auth/callback/github` (local).  
+- Set `NEXTAUTH_URL` to your app origin (e.g. `https://hiro.hanif.one` or `http://localhost:4321`).
 
 2. **Install the GitHub App**
    - Install it on your repositories

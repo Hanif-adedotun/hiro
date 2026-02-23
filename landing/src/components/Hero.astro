@@ -1,96 +1,53 @@
 ---
-import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { ArrowRight } from "@lucide/astro";
 ---
 
-<section>
-  <header class="relative z-10 w-full min-h-[70vh] mx-auto px-8">
-    <div class="pt-20 pb-14 flex flex-col items-center text-center">
+<section class="relative z-10" aria-labelledby="hero-heading">
+  <div class="container mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28">
+    <div class="mx-auto max-w-4xl text-center">
       <Badge
-        className="inline-block mb-6 px-8 py-4 bg-orange-900/60 text-orange-400 font-semibold rounded-full text-base tracking-wide uppercase"
+        className="mb-6 inline-block opacity-0 animate-fade-in-up rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm"
+        style={{ animationDelay: "0ms" }}
       >
         AI-Powered Test Generation & Documentation
       </Badge>
       <h1
-        class="font-extrabold !text-7xl md:!text-8xl text-white leading-tight mb-6 max-w-[90%] md:max-w-[60%]"
+        id="hero-heading"
+        class="opacity-0 animate-fade-in-up text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
+        style="animation-delay: 80ms;"
       >
-        Let AI handle<br class="hidden md:block" />
-        <span
-          class="text-transparent bg-gradient-to-tr from-orange-400 via-yellow-400 to-orange-200 bg-clip-text drop-shadow-lg"
-          >your testing</span
-        >, so you can <span class="text-white">focus on building.</span>
+        Let AI handle{" "}
+        <span class="text-chart-1">your testing</span>, so you can focus on building.
       </h1>
-      <p class="text-zinc-300 mb-8 max-w-[50%]">
-        Hiro automatically writes comprehensive unit tests and requirement
-        documentation for any codebase. Language agnostic. Zero setup. Always in
-        sync.
+      <p
+        class="mx-auto mt-6 max-w-2xl opacity-0 animate-fade-in-up text-lg text-muted-foreground md:text-xl"
+        style="animation-delay: 160ms;"
+      >
+        Hiro automatically writes comprehensive unit tests and requirement documentation for any codebase. Language agnostic. Zero setup. Always in sync.
+      </p>
+      <div
+        class="mt-10 flex flex-col items-center justify-center gap-4 opacity-0 animate-fade-in-up sm:flex-row"
+        style="animation-delay: 240ms;"
+      >
+        <a
+          href="https://hiro.hanif.one/login"
+          class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-lg transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 sm:w-auto"
+        >
+          Get started free
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </a>
+        <a
+          href="/#features"
+          class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card px-8 py-4 text-base font-semibold text-foreground transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 sm:w-auto"
+        >
+          See how it works
+        </a>
+      </div>
+      <p class="mt-4 text-sm text-muted-foreground">
+        No credit card required · Connect GitHub and start in minutes
       </p>
     </div>
-    <div class="flex flex-row gap-6 justify-center mb-2">
-      <a
-        href="/beta"
-        class="inline-flex items-center gap-2 px-6 py-4 font-semibold bg-gradient-to-br from-orange-500 via-yellow-400 to-orange-400 !text-black rounded-lg shadow hover:from-orange-600 hover:to-yellow-500 transition-all hover:scale-105 focus:outline-none"
-      >
-        Try Beta
-        <ArrowRight size={20} class="-mr-1 text-black" />
-      </a>
-      <a
-        href="#features"
-        class="inline-flex items-center gap-2 px-6 py-4 font-medium !text-orange-500 bg-zinc-900/80 border border-orange-800 hover:bg-zinc-900/90 hover:border-orange-400 rounded-lg shadow transition-all hover:scale-105"
-      >
-        See Features
-      </a>
-    </div>
-  </header>
-</section>
-
-<!-- <section class="product-hero">
-  <div class="container">
-    <div class="d-table">
-      <div class="d-table-cell center">
-        <div class="hero-copy">
-          <Typewriter
-            messages={["Generate Test Cases at One Click with AI"]}
-            class="h1-title"
-          />
-          <p>
-            Hiro automatically creates comprehensive unit tests for your
-            codebase, saving you time and improving code quality. Works with any
-            programming language or testing framework.
-          </p>
-          <div class="product-cta">
-            <Button variant={"default"} class="u-full-width">
-              Try Hiro — It's Free
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="hero-media">
-      <img src={Bomb.src} alt="Dynamite" />
-      <img src={Mailbox.src} alt="Mailbox" />
-      <img src={Folder.src} alt="Folder" />
-      <img src={Savings.src} alt="Money" />
-      <img src={Gift.src} alt="Gift" />
-    </div>
   </div>
-</section> -->
-
-<!-- <script>
-  const text = "Generate Test Cases at One Click with AI";
-  const h1Element = document.querySelector(".typing-animation");
-  let i = 0;
-
-  function typeWriter() {
-    if (!h1Element) return;
-    if (i < text.length) {
-      h1Element.textContent += text.charAt(i);
-      i++;
-      setTimeout(typeWriter, 50);
-    }
-  }
-
-  // Start the animation when the component is mounted
-  document.addEventListener("DOMContentLoaded", typeWriter);
-</script> -->
+</section>

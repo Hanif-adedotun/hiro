@@ -1,154 +1,51 @@
 ---
-import { ArrowRight } from "@lucide/astro";
+// Language icons for social proof
+const leftIcons = ["languages/flask.svg", "languages/go.svg", "languages/java.svg", "languages/nodejs.svg"];
+const rightIcons = ["languages/python.svg", "languages/nextjs-line.svg", "languages/atom-original.svg", "languages/php-plain.svg"];
 ---
 
-<section class="product-reviews" id="customers">
-  <div class="container">
-    <div class="center">
-      <div class="text-container text-white">
-        <h3 class="h1-title">Seamless Multi-Language Support</h3>
-        <p>
-          Instantly generate comprehensive unit tests and documentation for
-          Python, Java, Go, JavaScript, and more—no matter your tech stack.
-        </p>
-      </div>
-
-      <!-- <div class="customer-reviews m-margin">
-        <div class="flex center">
-          <img src={Stars.src} />
-          <span class="s-paragraph">Base on 87,00+ reviews</span>
-        </div>
-        <small><strong>1 millon</strong> customers and counting</small>
-      </div> -->
-      <div class="center">
+<section id="customers" class="relative z-10 py-20 md:py-28" aria-labelledby="customers-heading">
+  <div class="container mx-auto px-4">
+    <div class="mx-auto max-w-2xl text-center">
+      <h2 id="customers-heading" class="opacity-0 animate-fade-in-up text-3xl font-bold tracking-tight text-foreground md:text-4xl" style="animation-delay: 0ms;">
+        Seamless multi-language support
+      </h2>
+      <p class="mt-4 opacity-0 animate-fade-in-up text-lg text-muted-foreground" style="animation-delay: 80ms;">
+        Generate unit tests and documentation for Python, Java, Go, JavaScript, and more—no matter your tech stack.
+      </p>
+      <div class="mt-10 flex flex-col items-center gap-4 opacity-0 animate-fade-in-up sm:flex-row sm:justify-center" style="animation-delay: 160ms;">
         <a
-          href="/beta"
-          class="inline-flex items-center gap-2 px-6 py-4 font-semibold bg-gradient-to-br from-orange-500 via-yellow-400 to-orange-400 !text-black rounded-lg shadow hover:from-orange-600 hover:to-yellow-500 transition-all hover:scale-105 focus:outline-none"
+          href="https://hiro.hanif.one/login"
+          class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-lg transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 sm:w-auto"
         >
-          Try Beta
-          <ArrowRight size={20} class="-mr-1 text-black" />
+          Get started free
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
         </a>
-        <small class="block text-muted-foreground mt-5"
-          >Focus on building, while Hiro handles the testing for you.</small
-        >
       </div>
+      <p class="mt-4 text-sm text-muted-foreground">Focus on building. Hiro handles the testing.</p>
     </div>
 
-    <div class="customer-avatars hidden md:block">
-      <div class="left-side-avatars">
-        {
-          [
-            "languages/flask.svg",
-            "languages/go.svg",
-            "languages/java.svg",
-            "languages/nodejs.svg",
-          ].map((v, i) => (
-            <div class="circular-image bg-orange-950 border-2 border-dotted border-orange-500 p-4">
-              <img src={v} />
-            </div>
-          ))
-        }
-      </div>
-      <div class="right-side-avatars">
-        {
-          [
-            "languages/python.svg",
-            "languages/nextjs-line.svg",
-            "languages/atom-original.svg",
-            "languages/php-plain.svg",
-          ].map((v, i) => (
-            <div class="circular-image bg-orange-950 border-2 border-dotted border-orange-500 p-4">
-              <img src={v} />
-            </div>
-          ))
-        }
+    <div class="relative mx-auto mt-16 hidden h-48 max-w-4xl md:block" aria-hidden="true">
+      <div class="absolute inset-0 flex items-center justify-center gap-4">
+        {leftIcons.map((src, i) => (
+          <div
+            class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-border bg-card p-3 opacity-0 animate-scale-in shadow-sm"
+            style={`animation-delay: ${200 + i * 80}ms; position: absolute; left: ${15 + i * 8}%; top: ${i % 2 === 0 ? "10%" : "60%"};`}
+          >
+            <img src={src} alt="" class="h-full w-full object-contain" width="32" height="32" />
+          </div>
+        ))}
+        {rightIcons.map((src, i) => (
+          <div
+            class="flex h-16 w-16 items-center justify-center rounded-full border-2 border-border bg-card p-3 opacity-0 animate-scale-in shadow-sm"
+            style={`animation-delay: ${220 + i * 80}ms; position: absolute; right: ${15 + i * 8}%; top: ${i % 2 === 0 ? "10%" : "60%"};`}
+          >
+            <img src={src} alt="" class="h-full w-full object-contain" width="32" height="32" />
+          </div>
+        ))}
       </div>
     </div>
   </div>
 </section>
-
-<style lang="scss">
-  .product-reviews {
-    padding: 80px 0;
-    background-color: #fff;
-    .customer-reviews {
-      img {
-        width: 80px;
-      }
-      span {
-        margin-left: 10px;
-      }
-    }
-    .text-container {
-      max-width: 400px;
-      margin: 10px auto;
-    }
-    p,
-    h3 {
-      margin: 10px 0;
-    }
-    .container {
-      padding: 70px 0;
-      position: relative;
-    }
-    .customer-avatars {
-      .circular-image {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        overflow: hidden;
-        display: inline-block;
-        vertical-align: middle;
-        img {
-          width: 100%;
-        }
-      }
-
-      .circular-image {
-        position: absolute;
-      }
-      .left-side-avatars .circular-image {
-        &:nth-child(1) {
-          top: 0;
-          left: 20%;
-        }
-        &:nth-child(2) {
-          top: 14%;
-          left: 5%;
-        }
-        &:nth-child(3) {
-          bottom: 14%;
-          left: 5%;
-        }
-        &:nth-child(4) {
-          bottom: 0%;
-          left: 20%;
-        }
-      }
-      .right-side-avatars .circular-image {
-        &:nth-child(1) {
-          top: 0;
-          right: 20%;
-        }
-        &:nth-child(2) {
-          top: 14%;
-          right: 5%;
-        }
-        &:nth-child(3) {
-          bottom: 14%;
-          right: 5%;
-        }
-        &:nth-child(4) {
-          bottom: 0%;
-          right: 20%;
-        }
-      }
-    }
-
-    @media (max-width: 700px) {
-      .circular-image img {
-        display: none;
-      }
-    }
-  }
-</style>

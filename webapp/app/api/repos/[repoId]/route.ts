@@ -69,6 +69,7 @@ export async function PATCH(
       data: {
         enabled: body.enabled !== undefined ? body.enabled : repo.enabled,
         autoGenerateTests: body.autoGenerateTests !== undefined ? body.autoGenerateTests : repo.autoGenerateTests,
+        watchedBranches: body.watchedBranches !== undefined ? body.watchedBranches : repo.watchedBranches,
         maxPRsPerDay: body.maxPRsPerDay !== undefined ? body.maxPRsPerDay : repo.maxPRsPerDay,
         protectedDirs: body.protectedDirs !== undefined ? body.protectedDirs : repo.protectedDirs,
         onlyChangedFiles: body.onlyChangedFiles !== undefined ? body.onlyChangedFiles : repo.onlyChangedFiles,

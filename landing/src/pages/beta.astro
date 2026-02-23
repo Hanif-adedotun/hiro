@@ -1,34 +1,24 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
-import Hero from "../components/Hero.astro";
-import Brief from "../components/Brief.astro";
-import Pricing from "../components/Pricing.astro";
-import Customers from "../components/Customers.astro";
 import Footer from "../components/Footer.astro";
 ---
 
-<Layout title="Hiro | Generate Test Cases at one click">
-  <div
-    class="fixed inset-0 z-0 pointer-events-none"
-    aria-hidden="true"
-    style={{
-      background:
-        "linear-gradient(135deg, #181818 50%, #202023 100%, #181818 120%)",
-    }}
-  >
-    <div
-      class="absolute inset-0 bg-gradient-to-br from-orange-950/25 via-orange-900/10 to-black/80"
-    >
-    </div>
+<Layout
+  title="Hiro Beta | Try AI-Powered Test Generation"
+  description="Try the Hiro beta: generate unit tests and documentation with AI. Streamlit demo."
+>
+  <div class="relative min-h-screen flex flex-col">
+    <div class="fixed inset-0 -z-10 bg-background" aria-hidden="true" />
+    <Header />
+    <main class="flex-1 flex flex-col">
+      <iframe
+        src="https://hiro-beta.streamlit.app?embed=true"
+        class="relative z-10 h-[calc(100vh-4rem)] w-full flex-1"
+        allowfullscreen
+        title="Hiro Beta — Streamlit demo"
+      />
+    </main>
+    <Footer />
   </div>
-  <Header />
-  <div class="relative z-10 w-full h-[100vh]">
-    <iframe
-      src="https://hiro-beta.streamlit.app?embed=true"
-      style="height: 100%; width: 100%;"
-      allowfullscreen
-      class="relative z-10"></iframe>
-  </div>
-  <Footer />
 </Layout>

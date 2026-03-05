@@ -50,6 +50,17 @@ export class GitHubClient {
     return data
   }
 
+  /** List branch names for a repository. */
+  async listBranches(owner: string, repo: string, options?: { perPage?: number }) {
+    await delay(API_DELAY)
+    const { data } = await this.octokit.repos.listBranches({
+      owner,
+      repo,
+      per_page: options?.perPage ?? 100,
+    })
+    return data.map((b: { name: string }) => b.name)
+  }
+
   /** List repositories the authenticated user has access to (token auth only). */
   async listRepositoriesForAuthenticatedUser(options?: { perPage?: number; page?: number }) {
     await delay(API_DELAY)

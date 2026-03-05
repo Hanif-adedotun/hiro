@@ -71,9 +71,9 @@ export async function POST(
       )
     }
 
+    const meta = job.metadata as { branch?: string } | null
     const baseBranch =
-      (job.metadata && typeof job.metadata === 'object' && job.metadata.branch) ||
-      repo.defaultBranch
+      (meta && typeof meta === 'object' && meta.branch) || repo.defaultBranch
     const shortId = job.id.slice(-7)
     const branchName = `hiro-tests/${baseBranch}-${shortId}`
 

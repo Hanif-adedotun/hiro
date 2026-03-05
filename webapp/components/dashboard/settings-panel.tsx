@@ -19,6 +19,61 @@ interface SettingsPanelProps {
 
 type GitHubRepo = { id: number; fullName: string; name: string; owner: string; private: boolean; defaultBranch: string }
 
+function BranchesToWatch({
+  repoId,
+  watched,
+  onFetch,
+  branches,
+  loading,
+  onUpdate,
+}: {
+  repoId: string
+  watched: string[]
+  onFetch: (id: string) => void
+  branches: string[] | undefined
+  loading: boolean
+  onUpdate: (watchedBranches: string[]) => void
+}) {
+  useEffect(() => {
+    if (branches === undefined && !loading) onFetch(repoId)
+  }, [repoId, branches, loading, onFetch])
+
+  const toggle = (branch: string, checked: boolean) => {
+    if (checked) {
+      onUpdate([...watched, branch])
+    } else {
+      onUpdate(watched.filter((b) => b !== branch))
+    }
+  }
+
+  if (loading) {
+    return <p className="text-sm text-muted-foreground">Loading branches…</p>
+  }
+  if (branches === undefined) {
+    return <p className="text-sm text-muted-foreground">Loading…</p>
+  }
+  if (branches.length === 0) {
+    return <p className="text-sm text-muted-foreground">No branches found.</p>
+  }
+  return (
+    <div className="max-h-48 overflow-auto rounded-md border border-input bg-background p-3">
+      <div className="flex flex-col gap-2">
+        {branches.map((branch) => (
+          <label key={branch} className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={watched.includes(branch)}
+              onChange={(e) => toggle(branch, e.target.checked)}
+              className="rounded border-input text-primary focus:ring-primary"
+            />
+            <span className="text-sm text-foreground">{branch}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function SettingsPanel({ repositories }: SettingsPanelProps) {
   const router = useRouter()
   const [repos, setRepos] = useState(repositories)
@@ -28,6 +83,8 @@ export default function SettingsPanel({ repositories }: SettingsPanelProps) {
   const [addLoading, setAddLoading] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
   const comboboxRef = useRef<HTMLDivElement>(null)
+  const [branchesByRepoId, setBranchesByRepoId] = useState<Record<string, string[]>>({})
+  const [branchesLoading, setBranchesLoading] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     if (!addOpen) return
@@ -57,6 +114,19 @@ export default function SettingsPanel({ repositories }: SettingsPanelProps) {
   const availableToAdd = githubRepos.filter(
     (r) => !addedFullNames.has(r.fullName) && (!addSearch.trim() || r.fullName.toLowerCase().includes(addSearch.toLowerCase()) || r.name.toLowerCase().includes(addSearch.toLowerCase()))
   )
+
+  const fetchBranches = (repoId: string) => {
+    if (branchesByRepoId[repoId] !== undefined || branchesLoading[repoId]) return
+    setBranchesLoading((prev) => ({ ...prev, [repoId]: true }))
+    fetch(`/api/repos/${repoId}/branches`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) throw new Error(data.error)
+        setBranchesByRepoId((prev) => ({ ...prev, [repoId]: data.branches ?? [] }))
+      })
+      .catch(() => setBranchesByRepoId((prev) => ({ ...prev, [repoId]: [] })))
+      .finally(() => setBranchesLoading((prev) => ({ ...prev, [repoId]: false })))
+  }
 
   const addRepository = async (fullName: string) => {
     setAddError(null)
@@ -183,24 +253,19 @@ export default function SettingsPanel({ repositories }: SettingsPanelProps) {
 
                 {repo.autoGenerateTests && (
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-1">
-                      Branches to watch (comma-separated)
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Branches to watch
                     </label>
-                    <input
-                      type="text"
-                      defaultValue={(repo.watchedBranches ?? []).join(', ')}
-                      onBlur={(e) => {
-                        const branches = e.target.value
-                          .split(',')
-                          .map((b) => b.trim())
-                          .filter(Boolean)
-                        updateRepo(repo.id, { watchedBranches: branches })
-                      }}
-                      placeholder="main, develop"
-                      className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    <BranchesToWatch
+                      repoId={repo.id}
+                      watched={repo.watchedBranches ?? []}
+                      onFetch={fetchBranches}
+                      branches={branchesByRepoId[repo.id]}
+                      loading={branchesLoading[repo.id]}
+                      onUpdate={(watchedBranches) => updateRepo(repo.id, { watchedBranches })}
                     />
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Push or PR to these branches will trigger suggested tests. Leave empty to use default branch only.
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Push or PR to selected branches will trigger suggested tests. Leave none selected to use default branch only.
                     </p>
                   </div>
                 )}

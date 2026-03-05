@@ -91,20 +91,49 @@ Example response format:
         response_format: { type: 'json_object' },
       })
 
-      const content = completion.choices[0]?.message?.content
-      if (!content) {
+      const raw = completion.choices[0]?.message?.content
+      if (!raw || typeof raw !== 'string') {
         throw new Error('No response from LLM')
       }
 
-      // Parse JSON response
-      const response = JSON.parse(content) as TestGenerationResponse
+      // Strip markdown code fences if present
+      let content = raw.trim()
+      const jsonMatch = content.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/m)
+      if (jsonMatch) {
+        content = jsonMatch[1].trim()
+      }
 
-      // Validate response structure
-      if (!response.code || !response.metadata || !Array.isArray(response.packages)) {
+      let parsed: unknown
+      try {
+        parsed = JSON.parse(content)
+      } catch (parseError) {
+        console.error('LLM response (parse failed):', content.slice(0, 500))
+        throw new Error('Invalid response format from LLM: response is not valid JSON')
+      }
+
+      if (!parsed || typeof parsed !== 'object') {
         throw new Error('Invalid response format from LLM')
       }
 
-      return response
+      const obj = parsed as Record<string, unknown>
+      const code = typeof obj.code === 'string' ? obj.code : (obj.test_code as string) ?? ''
+      const metadata = typeof obj.metadata === 'string'
+        ? obj.metadata
+        : (obj.metadata && typeof obj.metadata === 'object')
+          ? JSON.stringify(obj.metadata)
+          : (obj.metadata != null ? String(obj.metadata) : '')
+      const packages = Array.isArray(obj.packages)
+        ? obj.packages.filter((p): p is string => typeof p === 'string')
+        : typeof obj.packages === 'string'
+          ? [obj.packages]
+          : []
+
+      if (!code || !code.trim()) {
+        console.error('LLM response (missing code):', content.slice(0, 500))
+        throw new Error('Invalid response format from LLM: missing or empty "code"')
+      }
+
+      return { code: code.trim(), metadata: metadata || 'No metadata.', packages }
     } catch (error) {
       console.error('Error generating tests:', error)
       throw new Error(`Failed to generate tests: ${error instanceof Error ? error.message : 'Unknown error'}`)
